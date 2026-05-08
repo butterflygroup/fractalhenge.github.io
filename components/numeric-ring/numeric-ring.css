@@ -1,0 +1,224 @@
+.numeric-ring {
+  overflow: visible;
+
+  --nr-size: min(72vmin, 22rem);
+  --nr-ring-width: 2px;
+  --nr-ring-color: #000;
+  --nr-num-color: #0f172a;
+  /* Digits that open the hub deck (button) — link-like blue */
+  --nr-digit-hit-color: #2563eb;
+  --nr-digit-hit-color-hover: #1d4ed8;
+  --nr-num-size: clamp(1rem, 4vmin, 1.75rem);
+  --nr-symbol-name-size: clamp(0.55rem, 2.65vmin, 0.92rem);
+  --nr-name-outset: clamp(0.85rem, 2.85vmin, 1.35rem);
+  /* Digit/deity radial offset adds --nr-orbit-gap-scale × this past size/2 + ring-width/2 */
+  --nr-orbit-gap: clamp(4px, 0.42em, 10px);
+  --nr-orbit-gap-scale: 2.5;
+  /* Seeds resolveChordRadiusRatio; mount mirrors to `--nr-junction-ratio` for SVG chords only. */
+  --nr-chord-radius-ratio: calc(1 - var(--nr-ring-width) / var(--nr-size));
+  /* Overwritten in mountNumericRing; fallback 1 avoids invalid calc before script */
+  --nr-junction-ratio: 1;
+  /* Optional: + nudge moves digit slightly toward hub along the spoke */
+  --nr-digit-radial-nudge: 0px;
+  /* Optional: tweak spoke rotation (degrees, e.g. for optical alignment). */
+  --nr-digit-angle-nudge-deg: 0deg;
+  /* Tangential slide along the ring (after radial place); negative ≈ half-step CCW, no extra digit rotation. */
+  --nr-digit-tangent-shift: -0.5ch;
+  /* Legacy spacing vars (deck UI is centered in hub; radial layout removed) */
+  --nr-card-first-gap: clamp(2.5rem, 14vmin, 6.5rem);
+  --nr-card-stack-gap: 10px;
+  --nr-card-step: clamp(36px, 7vmin, 56px);
+  --nr-card-chip-size: clamp(0.52rem, 2.1vmin, 0.72rem);
+  --nr-chord-stroke: 0.014;
+  --nr-chord-color: var(--nr-ring-color);
+
+  /* Gap between stacked deck chips in the centered hub panel */
+  --nr-hub-deck-gap: 0.5rem;
+
+  position: relative;
+  width: var(--nr-size);
+  height: var(--nr-size);
+  box-sizing: border-box;
+}
+
+.numeric-ring__track {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 50%;
+  border: var(--nr-ring-width) solid var(--nr-ring-color);
+  pointer-events: none;
+}
+
+.numeric-ring__chords {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.numeric-ring__chords line {
+  stroke: var(--nr-chord-color);
+  stroke-width: var(--nr-chord-stroke);
+  /* Butt caps so endpoints meet the ring circle; round caps extend past (x,y) */
+  stroke-linecap: butt;
+}
+
+.numeric-ring__label {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--nr-num-size) * 2);
+  height: calc(var(--nr-num-size) * 2);
+  margin-left: calc(-1 * var(--nr-num-size));
+  margin-top: calc(-1 * var(--nr-num-size));
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    Helvetica, Arial, sans-serif;
+  font-size: var(--nr-num-size);
+  color: var(--nr-num-color);
+}
+
+.numeric-ring__arm {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* Stable transform box — 0×0 arms make translateY(-orbit) resolve poorly */
+  width: 2px;
+  height: 2px;
+  margin-left: -1px;
+  margin-top: -1px;
+  overflow: visible;
+  display: grid;
+  place-items: center;
+  transform-origin: center center;
+  pointer-events: none;
+}
+
+.numeric-ring__label-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  line-height: 1;
+  text-align: center;
+  transform: rotate(calc(-1 * var(--nr-slot-deg)));
+}
+
+.numeric-ring__symbol-name {
+  display: inline-block;
+  transform: rotate(calc(-1 * var(--nr-slot-deg)));
+  font-size: var(--nr-symbol-name-size);
+  font-weight: 550;
+  line-height: 1.06;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.numeric-ring__digit-hit {
+  pointer-events: auto;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-weight: inherit;
+  font-variant-numeric: inherit;
+  color: var(--nr-digit-hit-color);
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-items: center;
+}
+
+.numeric-ring__digit-hit:hover {
+  color: var(--nr-digit-hit-color-hover);
+}
+
+.numeric-ring__digit-hit:focus-visible {
+  outline: 2px solid var(--nr-digit-hit-color);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.numeric-ring__hub-deck {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  padding: clamp(0.75rem, 4vmin, 1.75rem);
+}
+
+.numeric-ring__hub-deck-stack {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--nr-hub-deck-gap);
+  max-width: min(92%, calc(var(--nr-size) - 2.5rem));
+  max-height: min(72%, calc(var(--nr-size) - 4rem));
+  overflow-y: auto;
+  overflow-x: hidden;
+  pointer-events: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.numeric-ring__hub-deck::before {
+  content: '';
+  position: absolute;
+  inset: clamp(12px, 8%, 48px);
+  border-radius: 50%;
+  background: rgb(248 250 252 / 0);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.numeric-ring--hubDeckOpen .numeric-ring__hub-deck::before {
+  background: rgb(248 250 252 / 0.75);
+}
+
+.numeric-ring__card-hit {
+  pointer-events: auto;
+  cursor: pointer;
+  margin: 0;
+  padding: 0.12em 0.38em 0.14em;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: var(--nr-card-chip-size);
+  font-weight: 650;
+  font-variant-numeric: normal;
+  line-height: 1.25;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
+  text-align: center;
+  transform: rotate(calc(-1 * var(--nr-slot-deg)));
+}
+
+.numeric-ring__card-hit:focus-visible {
+  outline: 2px solid #0f172a;
+  outline-offset: 2px;
+}
+
+.numeric-ring__card-hit--hub {
+  transform: none;
+}
+
+.numeric-ring__card-chip-inner {
+  display: inline-block;
+  white-space: nowrap;
+}

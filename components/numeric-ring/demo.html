@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Numeric ring (1–9, 9 at top)</title>
+    <link rel="stylesheet" href="./numeric-ring.css" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        background: #f4f7fb;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="ring-one" aria-label="Numbers one through nine"></div>
+
+    <script type="module">
+      import { mountNumericRing } from './numeric-ring.js';
+
+      mountNumericRing(document.getElementById('ring-one'), {
+        labels: ['9', '1', '2', '3', '4', '5', '6', '7', '8'],
+        slotCards: {
+          '5': [
+            {
+              ordinal: 1,
+              ordinalTotal: 1,
+              title: 'DEMO CARD (FIVE)',
+              sections: [{ bodyParagraphs: ['Open digit 5, then tap this chip.'] }],
+            },
+          ],
+        },
+        onSlotCardActivate: ({ card }) => console.log('[demo]', card.title),
+      });
+    </script>
+  </body>
+</html>

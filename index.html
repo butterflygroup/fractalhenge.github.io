@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fractal Henge</title>
+    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=blueDigits1" />
+    <link rel="stylesheet" href="./components/fractal-henge/emotion-modal.css" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        background: #f4f7fb;
+      }
+
+      .ring-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: clamp(1.75rem, 5vmin, 3rem);
+        padding-inline: clamp(0.75rem, 4vw, 1.5rem);
+        padding-top: clamp(3.5rem, 10vh, 6rem);
+        padding-bottom: clamp(1.5rem, 5vh, 2.5rem);
+        box-sizing: border-box;
+        max-width: 100%;
+      }
+
+      .ninefold-intro {
+        max-width: min(42rem, 92vw);
+        width: 100%;
+        color: #334155;
+        font-family: ui-serif, Georgia, 'Times New Roman', serif;
+      }
+
+      .ninefold-intro__title {
+        margin: 0 0 0.75rem;
+        font-size: clamp(1.05rem, 2.8vw, 1.35rem);
+        font-weight: 650;
+        color: #0f172a;
+        text-align: center;
+        line-height: 1.25;
+      }
+
+      .ninefold-intro__lead {
+        margin: 0 0 1rem;
+        font-size: clamp(0.92rem, 2.4vw, 1.05rem);
+        line-height: 1.55;
+        text-align: left;
+      }
+
+      .ninefold-intro__list {
+        margin: 0;
+        padding-left: 1.15em;
+        font-size: clamp(0.88rem, 2.2vw, 1rem);
+        line-height: 1.5;
+        text-align: left;
+        list-style-type: disc;
+      }
+
+      .ninefold-intro__list li {
+        margin-bottom: 0.35em;
+      }
+
+      .ninefold-intro__list li:last-child {
+        margin-bottom: 0;
+      }
+
+      .pantheon-panel {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
+      }
+
+      .pantheon-toggle {
+        font: inherit;
+        cursor: pointer;
+        user-select: none;
+        color: #0f172a;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .pantheon-toggle input {
+        width: 1rem;
+        height: 1rem;
+        accent-color: #0f172a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="pantheon-panel">
+      <label class="pantheon-toggle">
+        <input type="checkbox" id="egyptian-toggle" />
+        Egyptian
+      </label>
+      <label class="pantheon-toggle">
+        <input type="checkbox" id="greek-toggle" />
+        Greek
+      </label>
+      <label class="pantheon-toggle">
+        <input type="checkbox" id="planets-toggle" />
+        Planets
+      </label>
+    </div>
+    <div class="ring-page">
+      <div id="ring-one" aria-label="Ninefold ring with chords"></div>
+      <section
+        class="ninefold-intro"
+        aria-labelledby="ninefold-intro-heading">
+        <h2 id="ninefold-intro-heading" class="ninefold-intro__title">
+          Nine gods, across traditions
+        </h2>
+        <p class="ninefold-intro__lead">
+          Start doing a lot of Breathwork and psychedelics 🍄 anywhere in the world, historically, 📜 and
+          these &lsquo;9 gods start showing up&rsquo;
+        </p>
+        <ul class="ninefold-intro__list">
+          <li>India 🇮🇳: The Navartri (Festival)</li>
+          <li>China 🇨🇳: The 9 Emperor Gods</li>
+          <li>Buddhism ☸️: The 9 &lsquo;unknown men&rsquo;</li>
+          <li>Etruscans of Italy 🇮🇹: 9 gods that influence the fate of men</li>
+          <li>In Greece 🇬🇷: Zeus leads a council of 9 gods to oversee humanity</li>
+          <li>Egypt 🇪🇬: The Ennead of Heliopolis</li>
+          <li>Norse 🇳🇴: the 9 gods that survived the Ragnarök</li>
+          <li>Mayan 🇲🇽/🇬🇹: the 9 Night Lords</li>
+        </ul>
+      </section>
+    </div>
+
+    <dialog
+      id="emotion-card-modal"
+      class="emotion-card-modal"
+      aria-labelledby="emotion-modal-title">
+      <div class="emotion-card-modal__surface">
+        <button type="button" class="emotion-card-modal__close" data-emotion-modal-close aria-label="Close">
+          ×
+        </button>
+        <header class="emotion-card-modal__header">
+          <h2 id="emotion-modal-title" class="emotion-card-modal__title" data-emotion-modal-title></h2>
+          <p class="emotion-card-modal__subtitle" data-emotion-modal-subtitle hidden></p>
+          <p class="emotion-card-modal__ordinal" data-emotion-modal-ordinal hidden></p>
+        </header>
+        <div class="emotion-card-modal__body" data-emotion-modal-body></div>
+      </div>
+    </dialog>
+
+    <script type="module">
+      import { mountNumericRing } from './components/numeric-ring/numeric-ring.js?v=hubDeck1';
+      import { CARDS_BY_DIGIT } from './components/fractal-henge/cards-data.js';
+      import { openEmotionCardModal, bindEmotionCardModal } from './components/fractal-henge/emotion-modal.js';
+
+      const LABELS = ['9', '1', '2', '3', '4', '5', '6', '7', '8'];
+
+      const CHORDS = [
+        ['5', '7'],
+        ['5', '8'],
+        ['6', '9'],
+        ['6', '3'],
+        ['7', '1'],
+        ['8', '2'],
+        ['9', '3'],
+        ['1', '4'],
+        ['2', '4'],
+      ];
+
+      const EGYPTIAN_NAMES = {
+        '8': 'Shu',
+        '9': 'Ra',
+        '1': 'Tefnut',
+        '2': 'Nu',
+        '3': 'Isis',
+        '4': 'Nephthys',
+        '5': 'Set',
+        '6': 'Osiris',
+        '7': 'Geb',
+      };
+
+      const GREEK_NAMES = {
+        '1': 'Hermes',
+        '2': 'Artemis',
+        '3': 'Apollo',
+        '4': 'Poseidon',
+        '5': 'Prometheus',
+        '6': 'Kronos',
+        '7': 'Zeus',
+        '8': 'Ares & Hades',
+        '9': 'Aphrodite',
+      };
+
+      const PLANET_NAMES = {
+        '8': 'Mars, Pluto',
+        '9': 'Venus',
+        '1': 'Mercury',
+        '2': 'Moon',
+        '3': 'The Sun',
+        '4': 'Neptune',
+        '5': 'Uranus',
+        '6': 'Saturn',
+        '7': 'Jupiter',
+      };
+
+      const ringEl = document.getElementById('ring-one');
+      const egyptianToggle = document.getElementById('egyptian-toggle');
+      const greekToggle = document.getElementById('greek-toggle');
+      const planetsToggle = document.getElementById('planets-toggle');
+      const emotionModal = document.getElementById('emotion-card-modal');
+
+      if (emotionModal instanceof HTMLDialogElement) {
+        bindEmotionCardModal(emotionModal);
+      }
+
+      function paint() {
+        const greekOn = greekToggle.checked;
+        const egyptianOn = egyptianToggle.checked;
+        const planetsOn = planetsToggle.checked;
+        const showSymbolNames = greekOn || egyptianOn || planetsOn;
+        const symbolNames = planetsOn
+          ? PLANET_NAMES
+          : greekOn
+            ? GREEK_NAMES
+            : EGYPTIAN_NAMES;
+
+        mountNumericRing(ringEl, {
+          labels: LABELS,
+          chords: CHORDS,
+          symbolNames,
+          showSymbolNames,
+          slotCards: CARDS_BY_DIGIT,
+          onSlotCardActivate: ({ card }) => {
+            if (emotionModal instanceof HTMLDialogElement) {
+              openEmotionCardModal(emotionModal, card);
+            }
+          },
+        });
+      }
+
+      egyptianToggle.addEventListener('change', () => {
+        if (egyptianToggle.checked) {
+          greekToggle.checked = false;
+          planetsToggle.checked = false;
+        }
+        paint();
+      });
+      greekToggle.addEventListener('change', () => {
+        if (greekToggle.checked) {
+          egyptianToggle.checked = false;
+          planetsToggle.checked = false;
+        }
+        paint();
+      });
+      planetsToggle.addEventListener('change', () => {
+        if (planetsToggle.checked) {
+          egyptianToggle.checked = false;
+          greekToggle.checked = false;
+        }
+        paint();
+      });
+      paint();
+    </script>
+  </body>
+</html>
