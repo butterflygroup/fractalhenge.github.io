@@ -12,12 +12,19 @@
 
 const DEFAULT_RING_CLASS = 'numeric-ring';
 const MOD_EGYPTIAN_CLASS = 'numeric-ring--egyptian';
+const MOD_GREEK_CLASS = 'numeric-ring--greek';
 const TRACK_CLASS = 'numeric-ring__track';
 const CHORDS_CLASS = 'numeric-ring__chords';
 const ARM_CLASS = 'numeric-ring__arm';
 const ARM_DIGIT_CLASS = 'numeric-ring__arm--digit';
 const ARM_NAME_CLASS = 'numeric-ring__arm--name';
+const ARM_PLANET_EPHEM_CLASS = 'numeric-ring__arm--planet-ephem';
 const SYMBOL_NAME_CLASS = 'numeric-ring__symbol-name';
+const SYMBOL_STACK_CLASS = 'numeric-ring__symbol-name-stack';
+const EPHEM_CONTAINER_CLASS = 'numeric-ring__symbol-ephem';
+const EPHEM_LINE_CLASS = 'numeric-ring__symbol-ephem-line';
+const PLANET_EPHEM_STACK_CLASS = 'numeric-ring__planet-ephem-stack';
+const MOD_PLANET_EPHEM_CLASS = 'numeric-ring--planetEphemeris';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -127,18 +134,32 @@ function dedupeUnorderedPairs(raw) {
  * @param {(string|number)[][]} [options.chords] — unordered digit pairs; duplicates ignored
  * @param {Record<string,string>} [options.symbolNames] — keyed by digit, e.g. `'9'` → `'Ra'`
  * @param {boolean} [options.showSymbolNames] — when true + map, deity label radially outward from digit
+ * @param {'greek'} [options.symbolPantheon] — when `'greek'`, root gets `numeric-ring--greek` for Greek-only deity layout tweaks
  * @param {number} [options.phaseOffsetDeg] — added to every slot angle (chords + labels); default 0. Use with `--nr-digit-angle-nudge-deg: 0` if you want a single coherent rotation instead of CSS-only spokes.
  * @param {Record<string, object[]>} [options.slotCards] — deck chips per digit label string; inner hub panel appears when digit is clicked
  * @param {(detail: { digit: string, card: object }) => void} [options.onSlotCardActivate] — e.g. open modal when a hub chip is chosen
+ * @param {Record<string, string[]>} [options.planetEphemerisByDigit] — optional ephemeris lines per digit (Planets mode); rendered on a separate radial arm
  */
 export function mountNumericRing(root, options = {}) {
   const labels = options.labels ?? ['9', '1', '2', '3', '4', '5', '6', '7', '8'];
   const symbolNames = options.symbolNames;
   const showSymbolNames = Boolean(options.showSymbolNames);
+  const planetEphemerisByDigit = options.planetEphemerisByDigit;
+  const hasPlanetEphem =
+    planetEphemerisByDigit &&
+    typeof planetEphemerisByDigit === 'object' &&
+    Object.keys(planetEphemerisByDigit).some((k) => {
+      const arr = planetEphemerisByDigit[k];
+      return Array.isArray(arr) && arr.length > 0;
+    });
 
   root.classList.add(DEFAULT_RING_CLASS);
   if (showSymbolNames) root.classList.add(MOD_EGYPTIAN_CLASS);
   else root.classList.remove(MOD_EGYPTIAN_CLASS);
+  if (hasPlanetEphem) root.classList.add(MOD_PLANET_EPHEM_CLASS);
+  else root.classList.remove(MOD_PLANET_EPHEM_CLASS);
+  if (options.symbolPantheon === 'greek') root.classList.add(MOD_GREEK_CLASS);
+  else root.classList.remove(MOD_GREEK_CLASS);
 
   if (options.orbitGap !== undefined) {
     root.style.setProperty('--nr-orbit-gap', options.orbitGap);
@@ -208,6 +229,16 @@ export function mountNumericRing(root, options = {}) {
   const digitOrbitRadius =
     'calc(var(--nr-size) / 2 + var(--nr-ring-width) / 2 + var(--nr-orbit-gap-scale) * var(--nr-orbit-gap))';
 
+  /** @param {string} outsetCss Expression after `digitOrbitRadius +`, e.g. `var(--nr-name-outset)` */
+  const spokeRadialTranslate = (outsetCss) =>
+    `translateY(calc(-1 * ((${digitOrbitRadius}) + ${outsetCss}))) ` +
+    `translateX(var(--nr-digit-tangent-shift, 0ch))`;
+
+  /** @param {string} fractionCss Multiplier in (0,1), e.g. `var(--nr-planet-title-orbit-fraction)` */
+  const spokeRadialInside = (fractionCss) =>
+    `translateY(calc(-1 * ((${digitOrbitRadius}) * (${fractionCss})))) ` +
+    `translateX(var(--nr-digit-tangent-shift, 0ch))`;
+
   const slotCards = options.slotCards;
   const onSlotCardActivate = options.onSlotCardActivate;
 
@@ -263,19 +294,53 @@ export function mountNumericRing(root, options = {}) {
     const deity = symbolNames && symbolNames[text];
 
     if (showSymbolNames && deity) {
+      const rotateLead = `rotate(calc(${angle}deg + var(--nr-digit-angle-nudge-deg, 0deg))) `;
+
       const nameArm = document.createElement('span');
       nameArm.className = `${ARM_CLASS} ${ARM_NAME_CLASS}`;
-      nameArm.style.transform =
-        `rotate(calc(${angle}deg + var(--nr-digit-angle-nudge-deg, 0deg))) translateY(` +
-        `calc(-1 * ((${digitOrbitRadius}) + var(--nr-name-outset)))) ` +
-        `translateX(var(--nr-digit-tangent-shift, 0ch))`;
+      nameArm.style.transform = hasPlanetEphem
+        ? `${rotateLead}${spokeRadialTranslate('var(--nr-planet-title-outset)')}`
+        : `${rotateLead}${spokeRadialTranslate('var(--nr-name-outset)')}`;
+
+      const stack = document.createElement('span');
+      stack.className = SYMBOL_STACK_CLASS;
 
       const nameEl = document.createElement('span');
       nameEl.className = SYMBOL_NAME_CLASS;
       nameEl.textContent = deity;
+      stack.appendChild(nameEl);
 
-      nameArm.appendChild(nameEl);
+      nameArm.appendChild(stack);
       outer.appendChild(nameArm);
+
+      const ephemLines =
+        hasPlanetEphem &&
+        planetEphemerisByDigit &&
+        Array.isArray(planetEphemerisByDigit[text])
+          ? planetEphemerisByDigit[text]
+          : [];
+
+      if (ephemLines.length > 0) {
+        const ephemArm = document.createElement('span');
+        ephemArm.className = `${ARM_CLASS} ${ARM_PLANET_EPHEM_CLASS}`;
+        ephemArm.style.transform =
+          `${rotateLead}${spokeRadialInside('var(--nr-planet-ephem-orbit-fraction)')}`;
+
+        const ephemSpin = document.createElement('span');
+        ephemSpin.className = PLANET_EPHEM_STACK_CLASS;
+
+        const ephem = document.createElement('span');
+        ephem.className = EPHEM_CONTAINER_CLASS;
+        for (const line of ephemLines) {
+          const lineEl = document.createElement('span');
+          lineEl.className = EPHEM_LINE_CLASS;
+          lineEl.textContent = line;
+          ephem.appendChild(lineEl);
+        }
+        ephemSpin.appendChild(ephem);
+        ephemArm.appendChild(ephemSpin);
+        outer.appendChild(ephemArm);
+      }
     }
 
     root.appendChild(outer);
@@ -347,5 +412,61 @@ export function mountNumericRing(root, options = {}) {
       },
       { signal: ac.signal }
     );
+  }
+}
+
+/**
+ * Update planet ephemeris line text on the interior radial arm (hub deck unaffected).
+ * @param {HTMLElement} root
+ * @param {Record<string, string[]> | null | undefined} planetEphemerisByDigit
+ */
+export function patchPlanetEphemeris(root, planetEphemerisByDigit) {
+  if (!(root instanceof HTMLElement)) return;
+
+  const map =
+    planetEphemerisByDigit && typeof planetEphemerisByDigit === 'object'
+      ? planetEphemerisByDigit
+      : null;
+
+
+  for (const label of root.querySelectorAll('[data-nr-digit].numeric-ring__label')) {
+    const digit = label.dataset.nrDigit;
+    const ephemArm = label.querySelector(`.numeric-ring__arm.${ARM_PLANET_EPHEM_CLASS}`);
+
+    const lines =
+      digit && map && Array.isArray(map[digit]) ? map[digit] : [];
+
+    if (!ephemArm) {
+      continue;
+    }
+
+    const ephemSpin = ephemArm.querySelector(`.${PLANET_EPHEM_STACK_CLASS}`);
+    let ephemEl =
+      ephemSpin instanceof HTMLElement
+        ? ephemSpin.querySelector(`.${EPHEM_CONTAINER_CLASS}`)
+        : ephemArm.querySelector(`.${EPHEM_CONTAINER_CLASS}`);
+
+    if (lines.length === 0) {
+      ephemArm.remove();
+      continue;
+    }
+
+    if (!(ephemSpin instanceof HTMLElement)) {
+      continue;
+    }
+
+    if (!ephemEl) {
+      ephemEl = document.createElement('span');
+      ephemEl.className = EPHEM_CONTAINER_CLASS;
+      ephemSpin.appendChild(ephemEl);
+    }
+
+    ephemEl.replaceChildren();
+    for (const line of lines) {
+      const lineSpan = document.createElement('span');
+      lineSpan.className = EPHEM_LINE_CLASS;
+      lineSpan.textContent = line;
+      ephemEl.appendChild(lineSpan);
+    }
   }
 }

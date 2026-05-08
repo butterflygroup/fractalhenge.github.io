@@ -1,0 +1,45 @@
+.planet-ephemeris {
+  width: 100%;
+  max-width: min(42rem, 92vw);
+  color: #334155;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    Helvetica, Arial, sans-serif;
+}
+
+.planet-ephemeris__title {
+  margin: 0 0 0.4rem;
+  font-size: clamp(0.85rem, 2.2vw, 0.95rem);
+  font-weight: 650;
+  color: #0f172a;
+  text-align: center;
+}
+
+.planet-ephemeris__note {
+  margin: 0 0 0.5rem;
+  font-size: clamp(0.72rem, 1.9vw, 0.82rem);
+  line-height: 1.45;
+  color: #64748b;
+  text-align: center;
+}
+
+.planet-ephemeris__disclaimer {
+  margin: 0.5rem 0 0;
+  font-size: clamp(0.68rem, 1.85vw, 0.76rem);
+  line-height: 1.45;
+  color: #64748b;
+  text-align: center;
+}
+
+.planet-ephemeris__link {
+  display: block;
+  margin: 0.4rem auto 0;
+  width: fit-content;
+  max-width: 100%;
+  font-size: clamp(0.72rem, 1.95vw, 0.82rem);
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.planet-ephemeris__link:hover {
+  color: #1d4ed8;
+}

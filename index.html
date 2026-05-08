@@ -4,8 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Fractal Henge</title>
-    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=blueDigits1" />
+    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=egyptNephNudgeDown1" />
     <link rel="stylesheet" href="./components/fractal-henge/emotion-modal.css" />
+    <link rel="stylesheet" href="./components/fractal-henge/planet-ephemeris.css?v=centerDisclaimer1" />
     <style>
       body {
         margin: 0;
@@ -30,6 +31,7 @@
       .ninefold-intro {
         max-width: min(42rem, 92vw);
         width: 100%;
+        margin-top: clamp(2.5rem, 7vmin, 4.25rem);
         color: #334155;
         font-family: ui-serif, Georgia, 'Times New Roman', serif;
       }
@@ -93,6 +95,31 @@
         height: 1rem;
         accent-color: #0f172a;
       }
+
+      .datetime-ct {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 10;
+        max-width: min(50vw, 14rem);
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial, sans-serif;
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+        font-variant-numeric: tabular-nums;
+        color: #334155;
+        text-align: right;
+        line-height: 1.35;
+      }
+
+      .datetime-ct__date {
+        font-weight: 500;
+      }
+
+      .datetime-ct__time {
+        margin-top: 0.15em;
+        font-size: 0.92em;
+        color: #64748b;
+      }
     </style>
   </head>
   <body>
@@ -110,8 +137,28 @@
         Planets
       </label>
     </div>
+    <div id="datetime-ct" class="datetime-ct" aria-live="polite"></div>
     <div class="ring-page">
       <div id="ring-one" aria-label="Ninefold ring with chords"></div>
+      <section
+        id="planet-ephemeris"
+        class="planet-ephemeris"
+        hidden
+        aria-live="polite"
+        aria-labelledby="planet-ephemeris-heading">
+        <h2 id="planet-ephemeris-heading" class="planet-ephemeris__title">Planet positions on the ring</h2>
+        <p class="planet-ephemeris__note" hidden>
+          Tropical geocentric longitudes appear next to each spoke&rsquo;s label while Planets mode is on. The ring keeps a fixed ninefold mapping.
+        </p>
+        <p class="planet-ephemeris__disclaimer">
+          Tropical geocentric positions, for reflection and education only; not medical or legal advice.
+        </p>
+        <a
+          class="planet-ephemeris__link"
+          href="https://horoscopes.astro-seek.com/astrology-ephemeris-planetary-online-ephemerides"
+          target="_blank"
+          rel="noopener noreferrer">Full ephemeris tables (Astro-Seek)</a>
+      </section>
       <section
         class="ninefold-intro"
         aria-labelledby="ninefold-intro-heading">
@@ -153,9 +200,13 @@
     </dialog>
 
     <script type="module">
-      import { mountNumericRing } from './components/numeric-ring/numeric-ring.js?v=hubDeck1';
+      import {
+        mountNumericRing,
+        patchPlanetEphemeris,
+      } from './components/numeric-ring/numeric-ring.js?v=hubTitleOut1';
       import { CARDS_BY_DIGIT } from './components/fractal-henge/cards-data.js';
       import { openEmotionCardModal, bindEmotionCardModal } from './components/fractal-henge/emotion-modal.js';
+      import { buildPlanetEphemerisByDigit } from './components/fractal-henge/planet-ephemeris.js';
 
       const LABELS = ['9', '1', '2', '3', '4', '5', '6', '7', '8'];
 
@@ -212,10 +263,70 @@
       const greekToggle = document.getElementById('greek-toggle');
       const planetsToggle = document.getElementById('planets-toggle');
       const emotionModal = document.getElementById('emotion-card-modal');
+      const planetEphemerisSection = document.getElementById('planet-ephemeris');
 
       if (emotionModal instanceof HTMLDialogElement) {
         bindEmotionCardModal(emotionModal);
       }
+
+      function mountCentralClock(container) {
+        if (!container) return;
+
+        const zone = 'America/Chicago';
+        const dateFmt = new Intl.DateTimeFormat('en-US', {
+          timeZone: zone,
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        });
+        const timeFmt = new Intl.DateTimeFormat('en-US', {
+          timeZone: zone,
+          hour: 'numeric',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true,
+        });
+        const tzFmt = new Intl.DateTimeFormat('en-US', {
+          timeZone: zone,
+          timeZoneName: 'short',
+        });
+
+        function tick() {
+          const now = new Date();
+          const tzParts = tzFmt.formatToParts(now);
+          const abbr =
+            tzParts.find((p) => p.type === 'timeZoneName')?.value ?? 'CT';
+
+          container.replaceChildren();
+          const dateLine = document.createElement('div');
+          dateLine.className = 'datetime-ct__date';
+          dateLine.textContent = dateFmt.format(now);
+          const timeLine = document.createElement('div');
+          timeLine.className = 'datetime-ct__time';
+          timeLine.textContent = `${timeFmt.format(now)} ${abbr}`;
+          container.appendChild(dateLine);
+          container.appendChild(timeLine);
+        }
+
+        tick();
+        setInterval(tick, 1000);
+      }
+
+      mountCentralClock(document.getElementById('datetime-ct'));
+
+      function syncPlanetInfoSectionVisibility() {
+        if (planetEphemerisSection instanceof HTMLElement) {
+          planetEphemerisSection.hidden = !planetsToggle.checked;
+        }
+      }
+
+      function refreshRingPlanetEphemeris() {
+        if (!planetsToggle.checked || !(ringEl instanceof HTMLElement)) return;
+        patchPlanetEphemeris(ringEl, buildPlanetEphemerisByDigit(new Date()));
+      }
+
+      setInterval(refreshRingPlanetEphemeris, 60000);
 
       function paint() {
         const greekOn = greekToggle.checked;
@@ -233,6 +344,12 @@
           chords: CHORDS,
           symbolNames,
           showSymbolNames,
+          symbolPantheon: planetsOn ? undefined : greekOn ? 'greek' : undefined,
+          ...(planetsOn
+            ? {
+                planetEphemerisByDigit: buildPlanetEphemerisByDigit(new Date()),
+              }
+            : {}),
           slotCards: CARDS_BY_DIGIT,
           onSlotCardActivate: ({ card }) => {
             if (emotionModal instanceof HTMLDialogElement) {
@@ -240,6 +357,7 @@
             }
           },
         });
+        syncPlanetInfoSectionVisibility();
       }
 
       egyptianToggle.addEventListener('change', () => {
@@ -264,6 +382,7 @@
         paint();
       });
       paint();
+      refreshRingPlanetEphemeris();
     </script>
   </body>
 </html>
