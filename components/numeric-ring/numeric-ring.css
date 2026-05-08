@@ -171,7 +171,9 @@
 }
 
 /* Digit-4 deity title: layout offset (avoid transform cascade issues in browser). */
-#ring-one.numeric-ring:not(.numeric-ring--literary) .numeric-ring__label[data-nr-digit='4'] .numeric-ring__symbol-name {
+#ring-one.numeric-ring:not(.numeric-ring--literary):not(.numeric-ring--medicine)
+  .numeric-ring__label[data-nr-digit='4']
+  .numeric-ring__symbol-name {
   position: relative;
   display: inline-block;
   left: 0;
@@ -216,6 +218,96 @@
   display: inline-block;
   left: calc(-1 * clamp(18px, 1.45vmin, 44px));
   top: clamp(18px, 1.42vmin, 42px);
+}
+
+/* Medicine — comma-separated lists (digits 9–8) */
+#ring-one.numeric-ring--medicine:not(.numeric-ring--planetEphemeris) .numeric-ring__symbol-name-stack {
+  max-width: min(52vw, 13rem);
+}
+
+#ring-one.numeric-ring--medicine:not(.numeric-ring--planetEphemeris) .numeric-ring__symbol-name {
+  white-space: normal;
+  font-size: clamp(0.46rem, 2.05vmin, 0.72rem);
+  line-height: 1.1;
+  max-width: min(52vw, 13rem);
+}
+
+/* Medicine — digit 9 (Ketamine, DXM, Unicorn, Amanita Muscaria): nudge up + slight left */
+#ring-one.numeric-ring--medicine:not(.numeric-ring--planetEphemeris)
+  .numeric-ring__label[data-nr-digit='9']
+  .numeric-ring__symbol-name {
+  position: relative;
+  display: inline-block;
+  left: calc(-1 * clamp(10px, 0.9vmin, 24px));
+  top: calc(-1 * clamp(42px, 3.6vmin, 92px));
+}
+
+/* Medicine — digit 1 (Cannabis, Hape, Noya Rao): up and left */
+#ring-one.numeric-ring--medicine:not(.numeric-ring--planetEphemeris)
+  .numeric-ring__label[data-nr-digit='1']
+  .numeric-ring__symbol-name {
+  position: relative;
+  display: inline-block;
+  left: calc(-1 * clamp(16px, 1.35vmin, 40px));
+  top: calc(-1 * clamp(18px, 1.55vmin, 42px));
+}
+
+/* Medicine — digit 2 (MDMA, Sanaga, Cacao, Wachuma): nudge right and up */
+#ring-one.numeric-ring--medicine:not(.numeric-ring--planetEphemeris)
+  .numeric-ring__label[data-nr-digit='2']
+  .numeric-ring__symbol-name {
+  position: relative;
+  display: inline-block;
+  left: clamp(38px, 3.2vmin, 86px);
+  top: calc(-1 * clamp(20px, 1.7vmin, 46px));
+}
+
+/* Medicine — digit 3 (Caffeine, Sugar, Shitty Carbs): nudge right */
+#ring-one.numeric-ring--medicine:not(.numeric-ring--planetEphemeris)
+  .numeric-ring__label[data-nr-digit='3']
+  .numeric-ring__symbol-name {
+  position: relative;
+  display: inline-block;
+  left: clamp(34px, 3vmin, 78px);
+}
+
+/* Medicine — digit 4 (Ayahuasca): slight right; lower than prior strong-up nudge */
+#ring-one.numeric-ring--medicine:not(.numeric-ring--planetEphemeris)
+  .numeric-ring__label[data-nr-digit='4']
+  .numeric-ring__symbol-name {
+  position: relative;
+  display: inline-block;
+  left: clamp(6px, 0.55vmin, 14px);
+  top: calc(-1 * clamp(14px, 1.2vmin, 32px));
+}
+
+/* Medicine — digit 6 (LSD, DMT): slight down and left */
+#ring-one.numeric-ring--medicine:not(.numeric-ring--planetEphemeris)
+  .numeric-ring__label[data-nr-digit='6']
+  .numeric-ring__symbol-name {
+  position: relative;
+  display: inline-block;
+  left: calc(-1 * clamp(14px, 1.15vmin, 32px));
+  top: clamp(12px, 1vmin, 26px);
+}
+
+/* Medicine — digit 7 (Mushrooms, Nitrous): down and left */
+#ring-one.numeric-ring--medicine:not(.numeric-ring--planetEphemeris)
+  .numeric-ring__label[data-nr-digit='7']
+  .numeric-ring__symbol-name {
+  position: relative;
+  display: inline-block;
+  left: calc(-1 * clamp(18px, 1.45vmin, 42px));
+  top: clamp(14px, 1.15vmin, 34px);
+}
+
+/* Medicine — digit 8 (Kambo, Breathwork, GHB): nudge left */
+#ring-one.numeric-ring--medicine:not(.numeric-ring--planetEphemeris)
+  .numeric-ring__label[data-nr-digit='8']
+  .numeric-ring__symbol-name {
+  position: relative;
+  display: inline-block;
+  left: calc(-1 * clamp(38px, 3.3vmin, 92px));
 }
 
 /* Greek Pantheon — Prometheus (digit 5) slight down */
@@ -298,7 +390,7 @@
 /* Egyptian Pantheon — Tefnut (digit 1) up vs Shu (digit 8) optical band */
 #ring-one.numeric-ring--egyptian:not(.numeric-ring--greek):not(.numeric-ring--planetEphemeris):not(
     .numeric-ring--literary
-  )
+  ):not(.numeric-ring--medicine)
   .numeric-ring__label[data-nr-digit='1']
   .numeric-ring__symbol-name {
   position: relative;
@@ -309,7 +401,7 @@
 /* Egyptian Pantheon — Nephthys (digit 4) up/right vs Set (digit 5) optical band */
 #ring-one.numeric-ring--egyptian:not(.numeric-ring--greek):not(.numeric-ring--planetEphemeris):not(
     .numeric-ring--literary
-  )
+  ):not(.numeric-ring--medicine)
   .numeric-ring__label[data-nr-digit='4']
   .numeric-ring__symbol-name {
   position: relative;
@@ -321,7 +413,7 @@
 /* Egyptian Pantheon — Osiris (digit 6) down/left vs Isis (digit 3); --egyptian = any names-on, excluded when Greek or Planets */
 #ring-one.numeric-ring--egyptian:not(.numeric-ring--greek):not(.numeric-ring--planetEphemeris):not(
     .numeric-ring--literary
-  )
+  ):not(.numeric-ring--medicine)
   .numeric-ring__label[data-nr-digit='6']
   .numeric-ring__symbol-name {
   position: relative;

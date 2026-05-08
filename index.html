@@ -8,12 +8,15 @@
         if (sessionStorage.getItem('fractalhenge-site-auth') === '1') {
           document.documentElement.classList.add('site-gate-unlocked');
         }
+        if (sessionStorage.getItem('fractalhenge-medicine-unlock') === '1') {
+          document.documentElement.classList.add('site-medicine-unlocked');
+        }
       } catch (e) {
         /* private mode / disabled storage */
       }
     </script>
     <title>Fractal Henge</title>
-    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=literaryPointOfViewNowrap1" />
+    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=medicineDigit1UpLeft1" />
     <link rel="stylesheet" href="./components/fractal-henge/emotion-modal.css" />
     <link rel="stylesheet" href="./components/fractal-henge/planet-ephemeris.css?v=centerDisclaimer1" />
     <link rel="stylesheet" href="./components/fractal-henge/birth-profile.css?v=natalSnapshotAstrologyBar1" />
@@ -90,7 +93,7 @@
       .ninefold-intro__list
         > li:not(.ninefold-intro__item--egypt):not(.ninefold-intro__item--greek):not(
           .ninefold-intro__item--literary
-        )::before {
+        ):not(.ninefold-intro__item--medicine)::before {
         content: '\2022';
         flex: 0 0 1.15em;
         width: 1.15em;
@@ -195,6 +198,34 @@
         color: #64748b;
       }
 
+      .site-lock-btn {
+        position: fixed;
+        bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+        right: max(1rem, env(safe-area-inset-right, 0px));
+        z-index: 15;
+        padding: 0.45rem 0.75rem;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+          sans-serif;
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+        font-weight: 600;
+        color: #334155;
+        background: #fff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgb(15 23 42 / 0.08);
+      }
+
+      .site-lock-btn:hover {
+        background: #f8fafc;
+        color: #0f172a;
+      }
+
+      .site-lock-btn:focus-visible {
+        outline: 2px solid #0f172a;
+        outline-offset: 2px;
+      }
+
       .ninefold-intro__term {
         margin: 0;
         padding: 0;
@@ -257,6 +288,10 @@
       html.site-gate-unlocked #site-gate {
         display: none !important;
         pointer-events: none;
+      }
+
+      html:not(.site-medicine-unlocked) .ninefold-intro__item--medicine {
+        display: none !important;
       }
 
       .site-gate {
@@ -386,8 +421,8 @@
     <script>
       (function () {
         var AUTH_KEY = 'fractalhenge-site-auth';
+        var MEDICINE_UNLOCK_KEY = 'fractalhenge-medicine-unlock';
         // Exact match (case-sensitive). Not real security on static hosting.
-        var EXPECTED = 'daniel';
         var gate = document.getElementById('site-gate');
         if (!gate) return;
         if (document.documentElement.classList.contains('site-gate-unlocked')) {
@@ -417,12 +452,26 @@
         form.addEventListener('submit', function (ev) {
           ev.preventDefault();
           clearError();
-          if (input.value.trim() === EXPECTED) {
+          var pwd = input.value.trim();
+          if (pwd === 'daniel') {
             try {
               sessionStorage.setItem(AUTH_KEY, '1');
+              sessionStorage.removeItem(MEDICINE_UNLOCK_KEY);
             } catch (e) {
               /* still allow entry */
             }
+            document.documentElement.classList.remove('site-medicine-unlocked');
+            dismissGate();
+            return;
+          }
+          if (pwd === 'douglas' || pwd === 'Sm00thDan13l') {
+            try {
+              sessionStorage.setItem(AUTH_KEY, '1');
+              sessionStorage.setItem(MEDICINE_UNLOCK_KEY, '1');
+            } catch (e) {
+              /* still allow entry */
+            }
+            document.documentElement.classList.add('site-medicine-unlocked');
             dismissGate();
             return;
           }
@@ -434,6 +483,13 @@
       })();
     </script>
     <div id="datetime-ct" class="datetime-ct" aria-live="polite"></div>
+    <button
+      type="button"
+      id="site-lock-btn"
+      class="site-lock-btn"
+      aria-label="Lock site and return to password screen">
+      Lock
+    </button>
     <div class="ring-page">
       <div class="ring-hub-wrap">
         <div id="ring-one" aria-label="Ninefold ring with chords"></div>
@@ -525,6 +581,15 @@
                 aria-label="Show literary elements on the ring" />
             </label>
             <span class="ninefold-intro__tradition-line">Literary elements</span>
+          </li>
+          <li class="ninefold-intro__item ninefold-intro__item--medicine">
+            <label class="pantheon-toggle ninefold-intro__list-pantheon-toggle">
+              <input
+                type="checkbox"
+                id="medicine-toggle"
+                aria-label="Show medicine mapping on the ring" />
+            </label>
+            <span class="ninefold-intro__tradition-line">Medicine</span>
           </li>
         </ul>
       </section>
@@ -708,7 +773,7 @@
       import {
         mountNumericRing,
         patchPlanetEphemeris,
-      } from './components/numeric-ring/numeric-ring.js?v=literaryElements1';
+      } from './components/numeric-ring/numeric-ring.js?v=medicineRing1';
       import { CARDS_BY_DIGIT } from './components/fractal-henge/cards-data.js';
       import { openEmotionCardModal, bindEmotionCardModal } from './components/fractal-henge/emotion-modal.js';
       import { buildPlanetEphemerisByDigit } from './components/fractal-henge/planet-ephemeris.js';
@@ -776,6 +841,18 @@
         '9': 'Style',
       };
 
+      const MEDICINE_NAMES = {
+        '9': 'Ketamine, DXM, Unicorn, Amanita Muscaria',
+        '1': 'Cannabis, Hape, Noya Rao',
+        '2': 'MDMA, Sanaga, Cacao, Wachuma',
+        '3': 'Caffeine, Sugar, Shitty Carbs',
+        '4': 'Ayahuasca',
+        '5': 'Meo, Bufo',
+        '6': 'LSD, DMT',
+        '7': 'Mushrooms, Nitrous',
+        '8': 'Kambo, Breathwork, GHB',
+      };
+
       const ringEl = document.getElementById('ring-one');
       const birthProfileModal = document.getElementById('birth-profile-modal');
       const natalHubEl = document.getElementById('natal-hub');
@@ -783,6 +860,7 @@
       const greekToggle = document.getElementById('greek-toggle');
       const planetsToggle = document.getElementById('planets-toggle');
       const literaryToggle = document.getElementById('literary-toggle');
+      const medicineToggle = document.getElementById('medicine-toggle');
       const emotionModal = document.getElementById('emotion-card-modal');
       const planetEphemerisSection = document.getElementById('planet-ephemeris');
 
@@ -861,6 +939,23 @@
 
       mountCentralClock(document.getElementById('datetime-ct'));
 
+      const siteLockBtn = document.getElementById('site-lock-btn');
+      if (siteLockBtn instanceof HTMLButtonElement) {
+        siteLockBtn.addEventListener('click', () => {
+          try {
+            sessionStorage.removeItem('fractalhenge-site-auth');
+            sessionStorage.removeItem('fractalhenge-medicine-unlock');
+          } catch (e) {
+            /* private mode */
+          }
+          document.documentElement.classList.remove(
+            'site-gate-unlocked',
+            'site-medicine-unlocked'
+          );
+          location.reload();
+        });
+      }
+
       if (birthProfileModal instanceof HTMLDialogElement && natalHubEl instanceof HTMLElement) {
         initBirthProfile({
           datetimeCt: document.getElementById('datetime-ct'),
@@ -889,15 +984,24 @@
         const egyptianOn = egyptianToggle.checked;
         const planetsOn = planetsToggle.checked;
         const literaryOn = literaryToggle.checked;
+        const medicineAllowed = document.documentElement.classList.contains(
+          'site-medicine-unlocked'
+        );
+        if (!medicineAllowed && medicineToggle.checked) {
+          medicineToggle.checked = false;
+        }
+        const medicineOn = medicineAllowed && medicineToggle.checked;
         const showSymbolNames =
-          greekOn || egyptianOn || planetsOn || literaryOn;
+          greekOn || egyptianOn || planetsOn || literaryOn || medicineOn;
         const symbolNames = planetsOn
           ? PLANET_NAMES
           : greekOn
             ? GREEK_NAMES
             : literaryOn
               ? LITERARY_NAMES
-              : EGYPTIAN_NAMES;
+              : medicineOn
+                ? MEDICINE_NAMES
+                : EGYPTIAN_NAMES;
 
         mountNumericRing(ringEl, {
           labels: LABELS,
@@ -910,7 +1014,9 @@
               ? 'greek'
               : literaryOn
                 ? 'literary'
-                : undefined,
+                : medicineOn
+                  ? 'medicine'
+                  : undefined,
           ...(planetsOn
             ? {
                 planetEphemerisByDigit: buildPlanetEphemerisByDigit(new Date()),
@@ -931,6 +1037,7 @@
           greekToggle.checked = false;
           planetsToggle.checked = false;
           literaryToggle.checked = false;
+          medicineToggle.checked = false;
         }
         paint();
       });
@@ -939,6 +1046,7 @@
           egyptianToggle.checked = false;
           planetsToggle.checked = false;
           literaryToggle.checked = false;
+          medicineToggle.checked = false;
         }
         paint();
       });
@@ -947,6 +1055,7 @@
           egyptianToggle.checked = false;
           greekToggle.checked = false;
           literaryToggle.checked = false;
+          medicineToggle.checked = false;
         }
         paint();
       });
@@ -955,9 +1064,24 @@
           egyptianToggle.checked = false;
           greekToggle.checked = false;
           planetsToggle.checked = false;
+          medicineToggle.checked = false;
         }
         paint();
       });
+      const medicineAllowed = document.documentElement.classList.contains(
+        'site-medicine-unlocked'
+      );
+      if (medicineAllowed) {
+        medicineToggle.addEventListener('change', () => {
+          if (medicineToggle.checked) {
+            egyptianToggle.checked = false;
+            greekToggle.checked = false;
+            planetsToggle.checked = false;
+            literaryToggle.checked = false;
+          }
+          paint();
+        });
+      }
       paint();
       refreshRingPlanetEphemeris();
     </script>
