@@ -171,11 +171,51 @@
 }
 
 /* Digit-4 deity title: layout offset (avoid transform cascade issues in browser). */
-#ring-one.numeric-ring .numeric-ring__label[data-nr-digit='4'] .numeric-ring__symbol-name {
+#ring-one.numeric-ring:not(.numeric-ring--literary) .numeric-ring__label[data-nr-digit='4'] .numeric-ring__symbol-name {
   position: relative;
   display: inline-block;
   left: 0;
   top: calc(-1 * clamp(5px, 0.42vmin, 9px));
+}
+
+/* Literary elements — multi-word labels (e.g. Point of view, Characterization) */
+#ring-one.numeric-ring--literary:not(.numeric-ring--planetEphemeris) .numeric-ring__symbol-name-stack {
+  max-width: min(46vw, 11rem);
+}
+
+#ring-one.numeric-ring--literary:not(.numeric-ring--planetEphemeris) .numeric-ring__symbol-name {
+  white-space: normal;
+  font-size: clamp(0.5rem, 2.35vmin, 0.82rem);
+  line-height: 1.12;
+  max-width: min(46vw, 11rem);
+}
+
+/* Literary — Point of view (digit 5): keep on one line */
+#ring-one.numeric-ring--literary:not(.numeric-ring--planetEphemeris)
+  .numeric-ring__label[data-nr-digit='5']
+  .numeric-ring__symbol-name {
+  white-space: nowrap;
+  max-width: none;
+}
+
+/* Literary — Characterization (digit 3): up and right */
+#ring-one.numeric-ring--literary:not(.numeric-ring--planetEphemeris)
+  .numeric-ring__label[data-nr-digit='3']
+  .numeric-ring__symbol-name {
+  position: relative;
+  display: inline-block;
+  left: clamp(22px, 2vmin, 52px);
+  top: calc(-1 * clamp(22px, 1.85vmin, 48px));
+}
+
+/* Literary — Theme (digit 7): down and left vs Tone (digit 2) */
+#ring-one.numeric-ring--literary:not(.numeric-ring--planetEphemeris)
+  .numeric-ring__label[data-nr-digit='7']
+  .numeric-ring__symbol-name {
+  position: relative;
+  display: inline-block;
+  left: calc(-1 * clamp(18px, 1.45vmin, 44px));
+  top: clamp(18px, 1.42vmin, 42px);
 }
 
 /* Greek Pantheon — Prometheus (digit 5) slight down */
@@ -256,7 +296,9 @@
 }
 
 /* Egyptian Pantheon — Tefnut (digit 1) up vs Shu (digit 8) optical band */
-#ring-one.numeric-ring--egyptian:not(.numeric-ring--greek):not(.numeric-ring--planetEphemeris)
+#ring-one.numeric-ring--egyptian:not(.numeric-ring--greek):not(.numeric-ring--planetEphemeris):not(
+    .numeric-ring--literary
+  )
   .numeric-ring__label[data-nr-digit='1']
   .numeric-ring__symbol-name {
   position: relative;
@@ -265,7 +307,9 @@
 }
 
 /* Egyptian Pantheon — Nephthys (digit 4) up/right vs Set (digit 5) optical band */
-#ring-one.numeric-ring--egyptian:not(.numeric-ring--greek):not(.numeric-ring--planetEphemeris)
+#ring-one.numeric-ring--egyptian:not(.numeric-ring--greek):not(.numeric-ring--planetEphemeris):not(
+    .numeric-ring--literary
+  )
   .numeric-ring__label[data-nr-digit='4']
   .numeric-ring__symbol-name {
   position: relative;
@@ -275,7 +319,9 @@
 }
 
 /* Egyptian Pantheon — Osiris (digit 6) down/left vs Isis (digit 3); --egyptian = any names-on, excluded when Greek or Planets */
-#ring-one.numeric-ring--egyptian:not(.numeric-ring--greek):not(.numeric-ring--planetEphemeris)
+#ring-one.numeric-ring--egyptian:not(.numeric-ring--greek):not(.numeric-ring--planetEphemeris):not(
+    .numeric-ring--literary
+  )
   .numeric-ring__label[data-nr-digit='6']
   .numeric-ring__symbol-name {
   position: relative;
@@ -285,8 +331,10 @@
 }
 
 #ring-one.numeric-ring--planetEphemeris .numeric-ring__label[data-nr-digit='4'] .numeric-ring__symbol-name {
-  left: clamp(9px, 0.62vmin, 18px);
-  top: calc(-1 * clamp(12px, 0.9vmin, 22px));
+  position: relative;
+  display: inline-block;
+  left: clamp(18px, 1.35vmin, 38px);
+  top: calc(-1 * clamp(20px, 1.45vmin, 40px));
 }
 
 /* Digit-1 (Mercury): stronger up/right, Planets mode */

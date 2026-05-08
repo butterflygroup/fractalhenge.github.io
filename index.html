@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Fractal Henge</title>
-    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=greekPoseidonNudgeDown2" />
+    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=literaryPointOfViewNowrap1" />
     <link rel="stylesheet" href="./components/fractal-henge/emotion-modal.css" />
     <link rel="stylesheet" href="./components/fractal-henge/planet-ephemeris.css?v=centerDisclaimer1" />
     <link rel="stylesheet" href="./components/fractal-henge/birth-profile.css?v=natalSnapshotAstrologyBar1" />
@@ -79,7 +79,9 @@
       }
 
       .ninefold-intro__list
-        > li:not(.ninefold-intro__item--egypt):not(.ninefold-intro__item--greek)::before {
+        > li:not(.ninefold-intro__item--egypt):not(.ninefold-intro__item--greek):not(
+          .ninefold-intro__item--literary
+        )::before {
         content: '\2022';
         flex: 0 0 1.15em;
         width: 1.15em;
@@ -328,6 +330,15 @@
           <li>Etruscans of Italy 🇮🇹: 9 gods that influence the fate of men</li>
           <li>Norse 🇳🇴: the 9 gods that survived the Ragnarök</li>
           <li>Mayan 🇲🇽/🇬🇹: the 9 Night Lords</li>
+          <li class="ninefold-intro__item ninefold-intro__item--literary">
+            <label class="pantheon-toggle ninefold-intro__list-pantheon-toggle">
+              <input
+                type="checkbox"
+                id="literary-toggle"
+                aria-label="Show literary elements on the ring" />
+            </label>
+            <span class="ninefold-intro__tradition-line">Literary elements</span>
+          </li>
         </ul>
       </section>
     </div>
@@ -510,7 +521,7 @@
       import {
         mountNumericRing,
         patchPlanetEphemeris,
-      } from './components/numeric-ring/numeric-ring.js?v=hubCloseEvent1';
+      } from './components/numeric-ring/numeric-ring.js?v=literaryElements1';
       import { CARDS_BY_DIGIT } from './components/fractal-henge/cards-data.js';
       import { openEmotionCardModal, bindEmotionCardModal } from './components/fractal-henge/emotion-modal.js';
       import { buildPlanetEphemerisByDigit } from './components/fractal-henge/planet-ephemeris.js';
@@ -566,12 +577,25 @@
         '7': 'Jupiter',
       };
 
+      const LITERARY_NAMES = {
+        '1': 'Setting',
+        '2': 'Tone',
+        '3': 'Characterization',
+        '4': 'Mood',
+        '5': 'Point of view',
+        '6': 'Plot',
+        '7': 'Theme',
+        '8': 'Conflict',
+        '9': 'Style',
+      };
+
       const ringEl = document.getElementById('ring-one');
       const birthProfileModal = document.getElementById('birth-profile-modal');
       const natalHubEl = document.getElementById('natal-hub');
       const egyptianToggle = document.getElementById('egyptian-toggle');
       const greekToggle = document.getElementById('greek-toggle');
       const planetsToggle = document.getElementById('planets-toggle');
+      const literaryToggle = document.getElementById('literary-toggle');
       const emotionModal = document.getElementById('emotion-card-modal');
       const planetEphemerisSection = document.getElementById('planet-ephemeris');
 
@@ -677,19 +701,29 @@
         const greekOn = greekToggle.checked;
         const egyptianOn = egyptianToggle.checked;
         const planetsOn = planetsToggle.checked;
-        const showSymbolNames = greekOn || egyptianOn || planetsOn;
+        const literaryOn = literaryToggle.checked;
+        const showSymbolNames =
+          greekOn || egyptianOn || planetsOn || literaryOn;
         const symbolNames = planetsOn
           ? PLANET_NAMES
           : greekOn
             ? GREEK_NAMES
-            : EGYPTIAN_NAMES;
+            : literaryOn
+              ? LITERARY_NAMES
+              : EGYPTIAN_NAMES;
 
         mountNumericRing(ringEl, {
           labels: LABELS,
           chords: CHORDS,
           symbolNames,
           showSymbolNames,
-          symbolPantheon: planetsOn ? undefined : greekOn ? 'greek' : undefined,
+          symbolPantheon: planetsOn
+            ? undefined
+            : greekOn
+              ? 'greek'
+              : literaryOn
+                ? 'literary'
+                : undefined,
           ...(planetsOn
             ? {
                 planetEphemerisByDigit: buildPlanetEphemerisByDigit(new Date()),
@@ -709,6 +743,7 @@
         if (egyptianToggle.checked) {
           greekToggle.checked = false;
           planetsToggle.checked = false;
+          literaryToggle.checked = false;
         }
         paint();
       });
@@ -716,6 +751,7 @@
         if (greekToggle.checked) {
           egyptianToggle.checked = false;
           planetsToggle.checked = false;
+          literaryToggle.checked = false;
         }
         paint();
       });
@@ -723,6 +759,15 @@
         if (planetsToggle.checked) {
           egyptianToggle.checked = false;
           greekToggle.checked = false;
+          literaryToggle.checked = false;
+        }
+        paint();
+      });
+      literaryToggle.addEventListener('change', () => {
+        if (literaryToggle.checked) {
+          egyptianToggle.checked = false;
+          greekToggle.checked = false;
+          planetsToggle.checked = false;
         }
         paint();
       });

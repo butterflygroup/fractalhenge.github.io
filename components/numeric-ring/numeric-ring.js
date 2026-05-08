@@ -13,6 +13,7 @@
 const DEFAULT_RING_CLASS = 'numeric-ring';
 const MOD_EGYPTIAN_CLASS = 'numeric-ring--egyptian';
 const MOD_GREEK_CLASS = 'numeric-ring--greek';
+const MOD_LITERARY_CLASS = 'numeric-ring--literary';
 const TRACK_CLASS = 'numeric-ring__track';
 const CHORDS_CLASS = 'numeric-ring__chords';
 const ARM_CLASS = 'numeric-ring__arm';
@@ -154,7 +155,7 @@ function dedupeUnorderedPairs(raw) {
  * @param {(string|number)[][]} [options.chords] — unordered digit pairs; duplicates ignored
  * @param {Record<string,string>} [options.symbolNames] — keyed by digit, e.g. `'9'` → `'Ra'`
  * @param {boolean} [options.showSymbolNames] — when true + map, deity label radially outward from digit
- * @param {'greek'} [options.symbolPantheon] — when `'greek'`, root gets `numeric-ring--greek` for Greek-only deity layout tweaks
+ * @param {'greek' | 'literary'} [options.symbolPantheon] — `'greek'`: `numeric-ring--greek`; `'literary'`: `numeric-ring--literary` (label layout)
  * @param {number} [options.phaseOffsetDeg] — added to every slot angle (chords + labels); default 0. Use with `--nr-digit-angle-nudge-deg: 0` if you want a single coherent rotation instead of CSS-only spokes.
  * @param {Record<string, object[]>} [options.slotCards] — deck chips per digit label string; inner hub panel appears when digit is clicked
  * @param {(detail: { digit: string, card: object }) => void} [options.onSlotCardActivate] — e.g. open modal when a hub chip is chosen
@@ -182,6 +183,8 @@ export function mountNumericRing(root, options = {}) {
   else root.classList.remove(MOD_PLANET_EPHEM_CLASS);
   if (options.symbolPantheon === 'greek') root.classList.add(MOD_GREEK_CLASS);
   else root.classList.remove(MOD_GREEK_CLASS);
+  if (options.symbolPantheon === 'literary') root.classList.add(MOD_LITERARY_CLASS);
+  else root.classList.remove(MOD_LITERARY_CLASS);
 
   if (options.orbitGap !== undefined) {
     root.style.setProperty('--nr-orbit-gap', options.orbitGap);
