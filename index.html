@@ -3,6 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      try {
+        if (sessionStorage.getItem('fractalhenge-site-auth') === '1') {
+          document.documentElement.classList.add('site-gate-unlocked');
+        }
+      } catch (e) {
+        /* private mode / disabled storage */
+      }
+    </script>
     <title>Fractal Henge</title>
     <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=literaryPointOfViewNowrap1" />
     <link rel="stylesheet" href="./components/fractal-henge/emotion-modal.css" />
@@ -243,9 +252,185 @@
       .ninefold-ennead-modal__table tbody tr:nth-child(even) {
         background: #f8fafc;
       }
+
+      /* Client-only gate: index.html only; direct URLs to e.g. components/numeric-ring/demo.html are not gated. */
+      html.site-gate-unlocked #site-gate {
+        display: none !important;
+        pointer-events: none;
+      }
+
+      .site-gate {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: clamp(1rem, 4vw, 2rem);
+        box-sizing: border-box;
+        background: #e8eef6;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
+          Arial, sans-serif;
+      }
+
+      .site-gate__card {
+        width: 100%;
+        max-width: 22rem;
+        padding: clamp(1.25rem, 4vw, 1.75rem);
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        box-shadow: 0 10px 40px rgb(15 23 42 / 0.12);
+      }
+
+      .site-gate__title {
+        margin: 0 0 0.35rem;
+        font-size: clamp(1.1rem, 3.5vw, 1.35rem);
+        font-weight: 650;
+        color: #0f172a;
+      }
+
+      .site-gate__desc {
+        margin: 0 0 1.1rem;
+        font-size: 0.9rem;
+        line-height: 1.45;
+        color: #64748b;
+      }
+
+      .site-gate__form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+      }
+
+      .site-gate__label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #334155;
+      }
+
+      .site-gate__input {
+        box-sizing: border-box;
+        width: 100%;
+        padding: 0.55rem 0.65rem;
+        font-size: 1rem;
+        border: 1px solid #94a3b8;
+        border-radius: 8px;
+        color: #0f172a;
+      }
+
+      .site-gate__input:focus {
+        outline: 2px solid #0f172a;
+        outline-offset: 2px;
+      }
+
+      .site-gate__error {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #b91c1c;
+      }
+
+      .site-gate__error[hidden] {
+        display: none !important;
+      }
+
+      .site-gate__submit {
+        margin-top: 0.25rem;
+        padding: 0.55rem 1rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #fff;
+        background: #0f172a;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .site-gate__submit:hover {
+        background: #1e293b;
+      }
+
+      .site-gate__submit:focus-visible {
+        outline: 2px solid #0f172a;
+        outline-offset: 2px;
+      }
     </style>
   </head>
   <body>
+    <div
+      id="site-gate"
+      class="site-gate"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="site-gate-title"
+      aria-describedby="site-gate-desc">
+      <div class="site-gate__card">
+        <h1 id="site-gate-title" class="site-gate__title">Fractal Henge</h1>
+        <p id="site-gate-desc" class="site-gate__desc">Enter the site password to continue.</p>
+        <form class="site-gate__form" data-site-gate-form novalidate>
+          <label class="site-gate__label" for="site-gate-password">Password</label>
+          <input
+            id="site-gate-password"
+            class="site-gate__input"
+            type="password"
+            name="password"
+            autocomplete="current-password"
+            data-site-gate-password />
+          <p class="site-gate__error" data-site-gate-error role="alert" hidden></p>
+          <button type="submit" class="site-gate__submit" data-site-gate-submit>Continue</button>
+        </form>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var AUTH_KEY = 'fractalhenge-site-auth';
+        // Exact match (case-sensitive). Not real security on static hosting.
+        var EXPECTED = 'daniel';
+        var gate = document.getElementById('site-gate');
+        if (!gate) return;
+        if (document.documentElement.classList.contains('site-gate-unlocked')) {
+          gate.remove();
+          return;
+        }
+        var form = gate.querySelector('[data-site-gate-form]');
+        var input = gate.querySelector('[data-site-gate-password]');
+        var errEl = gate.querySelector('[data-site-gate-error]');
+        if (!(form instanceof HTMLFormElement) || !(input instanceof HTMLInputElement)) {
+          return;
+        }
+        function dismissGate() {
+          document.documentElement.classList.add('site-gate-unlocked');
+          gate.remove();
+        }
+        function clearError() {
+          if (!errEl) return;
+          errEl.textContent = '';
+          errEl.hidden = true;
+        }
+        function setError(msg) {
+          if (!errEl) return;
+          errEl.textContent = msg;
+          errEl.hidden = false;
+        }
+        form.addEventListener('submit', function (ev) {
+          ev.preventDefault();
+          clearError();
+          if (input.value.trim() === EXPECTED) {
+            try {
+              sessionStorage.setItem(AUTH_KEY, '1');
+            } catch (e) {
+              /* still allow entry */
+            }
+            dismissGate();
+            return;
+          }
+          setError('Incorrect password.');
+          input.select();
+          input.focus();
+        });
+        input.focus();
+      })();
+    </script>
     <div id="datetime-ct" class="datetime-ct" aria-live="polite"></div>
     <div class="ring-page">
       <div class="ring-hub-wrap">
