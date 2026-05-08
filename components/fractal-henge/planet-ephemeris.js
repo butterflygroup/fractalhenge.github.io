@@ -90,7 +90,7 @@ function geocentricEclipticLongitude(date, body) {
 /**
  * @param {number} longitudeDeg
  */
-function longitudeToPlacement(longitudeDeg) {
+export function longitudeToPlacement(longitudeDeg) {
   const lon = normalizeLongitude(longitudeDeg);
   const signIdx = Math.min(11, Math.floor(lon / 30));
   const degInSign = lon % 30;

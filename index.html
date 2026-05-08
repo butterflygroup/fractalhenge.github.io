@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=egyptNephNudgeDown1" />
     <link rel="stylesheet" href="./components/fractal-henge/emotion-modal.css" />
     <link rel="stylesheet" href="./components/fractal-henge/planet-ephemeris.css?v=centerDisclaimer1" />
+    <link rel="stylesheet" href="./components/fractal-henge/birth-profile.css?v=birthSnapshotToggle1" />
     <style>
       body {
         margin: 0;
@@ -34,6 +35,11 @@
         margin-top: clamp(2.5rem, 7vmin, 4.25rem);
         color: #334155;
         font-family: ui-serif, Georgia, 'Times New Roman', serif;
+      }
+
+      /* Planet block + flex gap already separate ring and intro; avoid double spacing */
+      .ring-page:has(#planet-ephemeris:not([hidden])) .ninefold-intro {
+        margin-top: clamp(0.5rem, 1.8vmin, 1rem);
       }
 
       .ninefold-intro__title {
@@ -120,6 +126,64 @@
         font-size: 0.92em;
         color: #64748b;
       }
+
+      .ninefold-intro__term {
+        margin: 0;
+        padding: 0;
+        border: none;
+        background: none;
+        font: inherit;
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 0.12em;
+        cursor: pointer;
+        text-align: inherit;
+      }
+
+      .ninefold-intro__term:focus-visible {
+        outline: 2px solid #0f172a;
+        outline-offset: 2px;
+      }
+
+      .ninefold-ennead-modal__body > p {
+        margin: 0;
+      }
+
+      .ninefold-ennead-modal__body > p + p {
+        margin-top: 0.65rem;
+      }
+
+      .ninefold-ennead-modal__table-scroll {
+        margin-top: 0.75rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .ninefold-ennead-modal__table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: clamp(0.8125rem, 2vmin, 0.9rem);
+        line-height: 1.45;
+      }
+
+      .ninefold-ennead-modal__table th,
+      .ninefold-ennead-modal__table td {
+        padding: 0.45rem 0.5rem;
+        text-align: left;
+        vertical-align: top;
+        border: 1px solid #cbd5e1;
+      }
+
+      .ninefold-ennead-modal__table th {
+        background: #f1f5f9;
+        font-weight: 650;
+        color: #0f172a;
+        white-space: nowrap;
+      }
+
+      .ninefold-ennead-modal__table tbody tr:nth-child(even) {
+        background: #f8fafc;
+      }
     </style>
   </head>
   <body>
@@ -139,7 +203,10 @@
     </div>
     <div id="datetime-ct" class="datetime-ct" aria-live="polite"></div>
     <div class="ring-page">
-      <div id="ring-one" aria-label="Ninefold ring with chords"></div>
+      <div class="ring-hub-wrap">
+        <div id="ring-one" aria-label="Ninefold ring with chords"></div>
+        <div id="natal-hub" class="natal-hub natal-hub--empty" aria-live="polite"></div>
+      </div>
       <section
         id="planet-ephemeris"
         class="planet-ephemeris"
@@ -150,7 +217,7 @@
         <p class="planet-ephemeris__note" hidden>
           Tropical geocentric longitudes appear next to each spoke&rsquo;s label while Planets mode is on. The ring keeps a fixed ninefold mapping.
         </p>
-        <p class="planet-ephemeris__disclaimer">
+        <p class="planet-ephemeris__disclaimer" hidden>
           Tropical geocentric positions, for reflection and education only; not medical or legal advice.
         </p>
         <a
@@ -170,12 +237,22 @@
           these &lsquo;9 gods start showing up&rsquo;
         </p>
         <ul class="ninefold-intro__list">
+          <li>
+            Egypt 🇪🇬:
+            <button
+              type="button"
+              class="ninefold-intro__term"
+              data-open-ennead-modal
+              aria-haspopup="dialog"
+              aria-controls="ennead-modal">
+              The Ennead of Heliopolis
+            </button>
+          </li>
+          <li>In Greece 🇬🇷: Zeus leads a council of 9 gods to oversee humanity</li>
           <li>India 🇮🇳: The Navartri (Festival)</li>
           <li>China 🇨🇳: The 9 Emperor Gods</li>
           <li>Buddhism ☸️: The 9 &lsquo;unknown men&rsquo;</li>
           <li>Etruscans of Italy 🇮🇹: 9 gods that influence the fate of men</li>
-          <li>In Greece 🇬🇷: Zeus leads a council of 9 gods to oversee humanity</li>
-          <li>Egypt 🇪🇬: The Ennead of Heliopolis</li>
           <li>Norse 🇳🇴: the 9 gods that survived the Ragnarök</li>
           <li>Mayan 🇲🇽/🇬🇹: the 9 Night Lords</li>
         </ul>
@@ -199,14 +276,172 @@
       </div>
     </dialog>
 
+    <dialog
+      id="ennead-modal"
+      class="emotion-card-modal ninefold-ennead-modal"
+      aria-labelledby="ennead-modal-title">
+      <div class="emotion-card-modal__surface">
+        <button type="button" class="emotion-card-modal__close" data-ennead-modal-close aria-label="Close">
+          ×
+        </button>
+        <header class="emotion-card-modal__header">
+          <h2 id="ennead-modal-title" class="emotion-card-modal__title">The Ennead of Heliopolis</h2>
+        </header>
+        <div class="emotion-card-modal__body ninefold-ennead-modal__body">
+          <p>
+            The Ennead of Heliopolis is the Great or Heliopolitan Ennead: a traditional grouping of nine
+            deities centered on the solar cult of Heliopolis (Egyptian <em>Iunu</em>), one of the major
+            centers of ancient Egyptian theology. In Heliopolitan creation thought, these gods sit at the
+            head of a divine lineage that orders the emergence and continuation of the world.
+          </p>
+          <p>
+            The English word <em>Ennead</em> comes from Greek <em>enneás</em> (“nine”), echoing the
+            Egyptian term <em>Pesedjet</em> (“the Nine”), the usual name for this council of gods.
+          </p>
+          <div class="emotion-card-modal__section">
+            <h3 class="emotion-card-modal__section-title">The Nine Deities</h3>
+            <p>
+              The standard members form a generational family descending from the creator god:
+            </p>
+            <div class="ninefold-ennead-modal__table-scroll" role="region" aria-label="The nine Heliopolitan deities">
+              <table class="ninefold-ennead-modal__table">
+                <thead>
+                  <tr>
+                    <th scope="col">Deity</th>
+                    <th scope="col">Role / Domain</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Atum (or Atum-Re / Ra-Atum)</td>
+                    <td>Self-created sun god and creator of the universe</td>
+                  </tr>
+                  <tr>
+                    <td>Shu</td>
+                    <td>God of air, wind, and separation</td>
+                  </tr>
+                  <tr>
+                    <td>Tefnut</td>
+                    <td>Goddess of moisture, rain, and dew</td>
+                  </tr>
+                  <tr>
+                    <td>Geb</td>
+                    <td>God of the earth</td>
+                  </tr>
+                  <tr>
+                    <td>Nut</td>
+                    <td>Goddess of the sky</td>
+                  </tr>
+                  <tr>
+                    <td>Osiris</td>
+                    <td>God of the afterlife, resurrection, and fertility</td>
+                  </tr>
+                  <tr>
+                    <td>Isis</td>
+                    <td>Goddess of magic, motherhood, and healing</td>
+                  </tr>
+                  <tr>
+                    <td>Set (Seth)</td>
+                    <td>God of chaos, storms, and the desert</td>
+                  </tr>
+                  <tr>
+                    <td>Nephthys</td>
+                    <td>Goddess of mourning, protection, and night</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog
+      id="birth-profile-modal"
+      class="birth-modal"
+      aria-labelledby="birth-modal-title">
+      <div class="birth-modal__surface">
+        <div class="birth-modal__header">
+          <h2 id="birth-modal-title" class="birth-modal__title">Birth time & place</h2>
+          <button
+            type="button"
+            class="birth-modal__close"
+            data-birth-modal-close
+            aria-label="Close">&times;</button>
+        </div>
+        <p class="birth-modal__hint" hidden>
+          Stored only in this browser (localStorage). Searching a place sends the name to Open-Meteo
+          geocoding.
+        </p>
+        <form class="birth-modal__form" data-birth-form>
+          <div class="birth-modal__row birth-modal__row--grid">
+            <div class="birth-modal__row">
+              <label class="birth-modal__label" for="birth-date">Birth date</label>
+              <input id="birth-date" class="birth-modal__input" name="birthDate" type="date" required />
+            </div>
+            <div class="birth-modal__row">
+              <label class="birth-modal__label" for="birth-time">Birth time</label>
+              <input id="birth-time" class="birth-modal__input" name="birthTime" type="time" step="60" required />
+            </div>
+          </div>
+          <div class="birth-modal__row">
+            <span class="birth-modal__label">Place lookup</span>
+            <div class="birth-modal__search-row">
+              <input
+                class="birth-modal__input"
+                name="placeSearch"
+                type="search"
+                placeholder="City or region…"
+                autocomplete="off"
+                aria-label="City or region to search" />
+              <button type="button" class="birth-modal__secondary" data-birth-geocode>Search place</button>
+              <button type="button" class="birth-modal__secondary" data-birth-geolocate>
+                Device location
+              </button>
+            </div>
+            <p class="birth-modal__hint" hidden>
+              Search a place to fill latitude, longitude, and your birth time zone. The time zone field
+              appears after a successful search. Latitude &amp; longitude are required for Rising
+              (Ascendant). Device location uses your browser’s current position (often not birthplace);
+              use Search place to complete time zone before saving.
+            </p>
+          </div>
+          <div class="birth-modal__row birth-modal__row--grid">
+            <div class="birth-modal__row">
+              <label class="birth-modal__label" for="birth-lat">Latitude</label>
+              <input id="birth-lat" class="birth-modal__input" name="latitudeDeg" type="number" step="0.000001" min="-90" max="90" required placeholder="e.g. 41.878" />
+            </div>
+            <div class="birth-modal__row">
+              <label class="birth-modal__label" for="birth-lon">Longitude (east positive)</label>
+              <input id="birth-lon" class="birth-modal__input" name="longitudeDeg" type="number" step="0.000001" min="-180" max="180" required placeholder="e.g. -87.630" />
+            </div>
+          </div>
+          <div class="birth-modal__row birth-modal__tz-panel" data-birth-tz-panel hidden aria-hidden="true">
+            <label class="birth-modal__label" for="birth-tz">Time zone when you were born (IANA)</label>
+            <select
+              id="birth-tz"
+              class="birth-modal__select"
+              name="ianaZone"
+              data-birth-timezone></select>
+          </div>
+          <p class="birth-modal__error" data-birth-error role="alert"></p>
+          <div class="birth-modal__actions">
+            <button type="submit" class="birth-modal__submit">Save chart</button>
+            <button type="button" class="birth-modal__secondary" data-birth-clear>Clear chart</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
     <script type="module">
       import {
         mountNumericRing,
         patchPlanetEphemeris,
-      } from './components/numeric-ring/numeric-ring.js?v=hubTitleOut1';
+      } from './components/numeric-ring/numeric-ring.js?v=hubCloseEvent1';
       import { CARDS_BY_DIGIT } from './components/fractal-henge/cards-data.js';
       import { openEmotionCardModal, bindEmotionCardModal } from './components/fractal-henge/emotion-modal.js';
       import { buildPlanetEphemerisByDigit } from './components/fractal-henge/planet-ephemeris.js';
+      import { initBirthProfile } from './components/fractal-henge/birth-profile.js';
 
       const LABELS = ['9', '1', '2', '3', '4', '5', '6', '7', '8'];
 
@@ -259,6 +494,8 @@
       };
 
       const ringEl = document.getElementById('ring-one');
+      const birthProfileModal = document.getElementById('birth-profile-modal');
+      const natalHubEl = document.getElementById('natal-hub');
       const egyptianToggle = document.getElementById('egyptian-toggle');
       const greekToggle = document.getElementById('greek-toggle');
       const planetsToggle = document.getElementById('planets-toggle');
@@ -267,6 +504,28 @@
 
       if (emotionModal instanceof HTMLDialogElement) {
         bindEmotionCardModal(emotionModal);
+      }
+
+      const enneadModal = document.getElementById('ennead-modal');
+      const enneadOpenBtn = document.querySelector('[data-open-ennead-modal]');
+      const enneadCloseBtns = document.querySelectorAll('[data-ennead-modal-close]');
+
+      if (enneadModal instanceof HTMLDialogElement && enneadOpenBtn instanceof HTMLButtonElement) {
+        enneadOpenBtn.addEventListener('click', () => {
+          enneadModal.showModal();
+        });
+
+        for (const btn of enneadCloseBtns) {
+          btn.addEventListener('click', () => {
+            enneadModal.close();
+          });
+        }
+
+        enneadModal.addEventListener('click', (ev) => {
+          if (ev.target === enneadModal) {
+            enneadModal.close();
+          }
+        });
       }
 
       function mountCentralClock(container) {
@@ -292,21 +551,24 @@
           timeZoneName: 'short',
         });
 
+        const tickWrap = document.createElement('div');
+        tickWrap.className = 'datetime-ct__tick';
+        container.appendChild(tickWrap);
+
         function tick() {
           const now = new Date();
           const tzParts = tzFmt.formatToParts(now);
           const abbr =
             tzParts.find((p) => p.type === 'timeZoneName')?.value ?? 'CT';
 
-          container.replaceChildren();
+          tickWrap.replaceChildren();
           const dateLine = document.createElement('div');
           dateLine.className = 'datetime-ct__date';
           dateLine.textContent = dateFmt.format(now);
           const timeLine = document.createElement('div');
           timeLine.className = 'datetime-ct__time';
           timeLine.textContent = `${timeFmt.format(now)} ${abbr}`;
-          container.appendChild(dateLine);
-          container.appendChild(timeLine);
+          tickWrap.append(dateLine, timeLine);
         }
 
         tick();
@@ -314,6 +576,15 @@
       }
 
       mountCentralClock(document.getElementById('datetime-ct'));
+
+      if (birthProfileModal instanceof HTMLDialogElement && natalHubEl instanceof HTMLElement) {
+        initBirthProfile({
+          datetimeCt: document.getElementById('datetime-ct'),
+          dialog: birthProfileModal,
+          natalHub: natalHubEl,
+          numericRingRoot: ringEl instanceof HTMLElement ? ringEl : null,
+        });
+      }
 
       function syncPlanetInfoSectionVisibility() {
         if (planetEphemerisSection instanceof HTMLElement) {

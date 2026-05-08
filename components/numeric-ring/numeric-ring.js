@@ -38,6 +38,26 @@ const CARD_HIT_HUB_MOD = 'numeric-ring__card-hit--hub';
 const hubEscapeAbortByRoot = new WeakMap();
 
 /**
+ * Ring root dispatches this; the active mount listens and runs the same close as Escape.
+ * Works across duplicate ESM instances (e.g. `numeric-ring.js` vs `numeric-ring.js?v=…`).
+ */
+export const NUMERIC_RING_REQUEST_CLOSE_HUB_EVENT = 'fractalhenge-close-hub-deck';
+
+/**
+ * Dismiss digit hub deck (card chips) if open — same state as Escape.
+ * @param {HTMLElement} root
+ */
+export function closeNumericRingHubDeck(root) {
+  if (!(root instanceof HTMLElement)) return;
+  root.dispatchEvent(
+    new CustomEvent(NUMERIC_RING_REQUEST_CLOSE_HUB_EVENT, { bubbles: false })
+  );
+}
+
+/** Fired on the ring root when a digit opens the inner hub deck (`bubbles: false`). */
+export const NUMERIC_RING_HUB_OPENED_EVENT = 'fractalhenge-hub-opened';
+
+/**
  * @param {string} digit
  * @param {object} card
  * @param {(detail: { digit: string, card: object }) => void} onSlotCardActivate
@@ -139,6 +159,8 @@ function dedupeUnorderedPairs(raw) {
  * @param {Record<string, object[]>} [options.slotCards] — deck chips per digit label string; inner hub panel appears when digit is clicked
  * @param {(detail: { digit: string, card: object }) => void} [options.onSlotCardActivate] — e.g. open modal when a hub chip is chosen
  * @param {Record<string, string[]>} [options.planetEphemerisByDigit] — optional ephemeris lines per digit (Planets mode); rendered on a separate radial arm
+ *
+ * When the inner hub deck opens, `root` dispatches {@link NUMERIC_RING_HUB_OPENED_EVENT} (`bubbles: false`, `detail.digit`). Closing from outside uses {@link closeNumericRingHubDeck} ({@link NUMERIC_RING_REQUEST_CLOSE_HUB_EVENT} on `root`).
  */
 export function mountNumericRing(root, options = {}) {
   const labels = options.labels ?? ['9', '1', '2', '3', '4', '5', '6', '7', '8'];
@@ -388,6 +410,12 @@ export function mountNumericRing(root, options = {}) {
       hubDeck.setAttribute('aria-hidden', 'false');
       root.classList.add('numeric-ring--hubDeckOpen');
       updateExpanded();
+      root.dispatchEvent(
+        new CustomEvent(NUMERIC_RING_HUB_OPENED_EVENT, {
+          bubbles: false,
+          detail: { digit },
+        })
+      );
     }
 
     for (const { digit, button, cards } of digitDeckToggles) {
@@ -403,6 +431,13 @@ export function mountNumericRing(root, options = {}) {
 
     const ac = new AbortController();
     hubEscapeAbortByRoot.set(root, ac);
+    root.addEventListener(
+      NUMERIC_RING_REQUEST_CLOSE_HUB_EVENT,
+      () => {
+        closeHub();
+      },
+      { signal: ac.signal }
+    );
     document.addEventListener(
       'keydown',
       (e) => {
