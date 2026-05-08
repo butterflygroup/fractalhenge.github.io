@@ -90,11 +90,11 @@
   border-color: #94a3b8;
 }
 
-.datetime-ct__snapshot-toggle-row {
-  margin-top: 0.35rem;
+.natal-snapshot-toggle-row {
+  flex-shrink: 0;
 }
 
-.datetime-ct__snapshot-toggle {
+.natal-snapshot-toggle {
   font: inherit;
   font-size: 0.9em;
   padding: 0.2rem 0.45rem;
@@ -106,7 +106,7 @@
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
 }
 
-.datetime-ct__snapshot-toggle:hover {
+.natal-snapshot-toggle:hover {
   border-color: #94a3b8;
 }
 

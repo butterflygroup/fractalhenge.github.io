@@ -187,14 +187,14 @@
   top: clamp(8px, 0.62vmin, 18px);
 }
 
-/* Greek Pantheon — Poseidon (digit 4): well down/right vs Prometheus optical band */
+/* Greek Pantheon — Poseidon (digit 4): raise label to align with Prometheus band (digit 5) */
 #ring-one.numeric-ring--greek:not(.numeric-ring--planetEphemeris)
   .numeric-ring__label[data-nr-digit='4']
   .numeric-ring__symbol-name {
   position: relative;
   display: inline-block;
   left: clamp(28px, 2.2vmin, 58px);
-  top: clamp(12px, 0.95vmin, 28px);
+  top: calc(-1 * clamp(18px, 1.35vmin, 44px) + clamp(6px, 0.42vmin, 11px));
 }
 
 /* Greek Pantheon — Kronos (digit 6) down vs Apollo (digit 3) optical horizontal band */

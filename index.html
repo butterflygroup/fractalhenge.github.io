@@ -4,10 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Fractal Henge</title>
-    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=egyptNephNudgeDown1" />
+    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=greekPoseidonNudgeDown2" />
     <link rel="stylesheet" href="./components/fractal-henge/emotion-modal.css" />
     <link rel="stylesheet" href="./components/fractal-henge/planet-ephemeris.css?v=centerDisclaimer1" />
-    <link rel="stylesheet" href="./components/fractal-henge/birth-profile.css?v=birthSnapshotToggle1" />
+    <link rel="stylesheet" href="./components/fractal-henge/birth-profile.css?v=natalSnapshotAstrologyBar1" />
     <style>
       body {
         margin: 0;
@@ -60,30 +60,87 @@
 
       .ninefold-intro__list {
         margin: 0;
-        padding-left: 1.15em;
+        padding-left: 0;
         font-size: clamp(0.88rem, 2.2vw, 1rem);
         line-height: 1.5;
         text-align: left;
-        list-style-type: disc;
+        list-style: none;
       }
 
-      .ninefold-intro__list li {
+      .ninefold-intro__list > li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.4rem;
         margin-bottom: 0.35em;
       }
 
-      .ninefold-intro__list li:last-child {
+      .ninefold-intro__list > li:last-child {
         margin-bottom: 0;
       }
 
-      .pantheon-panel {
-        position: fixed;
-        top: 1rem;
-        left: 1rem;
-        z-index: 10;
-        display: flex;
-        flex-direction: column;
+      .ninefold-intro__list
+        > li:not(.ninefold-intro__item--egypt):not(.ninefold-intro__item--greek)::before {
+        content: '\2022';
+        flex: 0 0 1.15em;
+        width: 1.15em;
+        text-align: center;
+        line-height: 1.5;
+        flex-shrink: 0;
+      }
+
+      .ninefold-intro__list-pantheon-toggle {
+        box-sizing: border-box;
+        flex: 0 0 1.15em;
+        width: 1.15em;
+        display: inline-flex;
+        justify-content: center;
         align-items: flex-start;
-        gap: 0.35rem;
+        flex-shrink: 0;
+        color: inherit;
+        line-height: inherit;
+        padding-top: 0.12em;
+      }
+
+      .ninefold-intro__tradition-line {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .ninefold-intro__planets-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 0.35rem 0.5rem;
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 0.5em;
+      }
+
+      .ninefold-intro__snapshot-toggle-root {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+      }
+
+      .ninefold-intro .ninefold-intro__planets-row.pantheon-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        flex: 0 1 auto;
+        min-width: 0;
+        max-width: none;
+        margin-bottom: 0;
+        color: inherit;
+      }
+
+      .ninefold-intro__planets-row .ninefold-intro__list-pantheon-toggle {
+        padding-top: 0;
+        align-items: center;
+      }
+
+      .ninefold-intro__planets-row .ninefold-intro__tradition-line {
+        flex: 0 1 auto;
       }
 
       .pantheon-toggle {
@@ -187,20 +244,6 @@
     </style>
   </head>
   <body>
-    <div class="pantheon-panel">
-      <label class="pantheon-toggle">
-        <input type="checkbox" id="egyptian-toggle" />
-        Egyptian
-      </label>
-      <label class="pantheon-toggle">
-        <input type="checkbox" id="greek-toggle" />
-        Greek
-      </label>
-      <label class="pantheon-toggle">
-        <input type="checkbox" id="planets-toggle" />
-        Planets
-      </label>
-    </div>
     <div id="datetime-ct" class="datetime-ct" aria-live="polite"></div>
     <div class="ring-page">
       <div class="ring-hub-wrap">
@@ -236,19 +279,49 @@
           Start doing a lot of Breathwork and psychedelics 🍄 anywhere in the world, historically, 📜 and
           these &lsquo;9 gods start showing up&rsquo;
         </p>
+        <div class="ninefold-intro__planets-bar">
+          <label class="pantheon-toggle ninefold-intro__planets-row">
+            <span class="ninefold-intro__list-pantheon-toggle">
+              <input
+                type="checkbox"
+                id="planets-toggle"
+                aria-label="Show planet names on the ring" />
+            </span>
+            <span class="ninefold-intro__tradition-line">Planets</span>
+          </label>
+          <div id="natal-snapshot-toggle-root" class="ninefold-intro__snapshot-toggle-root"></div>
+        </div>
         <ul class="ninefold-intro__list">
-          <li>
-            Egypt 🇪🇬:
-            <button
-              type="button"
-              class="ninefold-intro__term"
-              data-open-ennead-modal
-              aria-haspopup="dialog"
-              aria-controls="ennead-modal">
-              The Ennead of Heliopolis
-            </button>
+          <li class="ninefold-intro__item ninefold-intro__item--egypt">
+            <label class="pantheon-toggle ninefold-intro__list-pantheon-toggle">
+              <input
+                type="checkbox"
+                id="egyptian-toggle"
+                aria-label="Show Egyptian deity names on the ring" />
+            </label>
+            <span class="ninefold-intro__tradition-line">
+              Egypt 🇪🇬:
+              <button
+                type="button"
+                class="ninefold-intro__term"
+                data-open-ennead-modal
+                aria-haspopup="dialog"
+                aria-controls="ennead-modal">
+                The Ennead of Heliopolis
+              </button>
+            </span>
           </li>
-          <li>In Greece 🇬🇷: Zeus leads a council of 9 gods to oversee humanity</li>
+          <li class="ninefold-intro__item ninefold-intro__item--greek">
+            <label class="pantheon-toggle ninefold-intro__list-pantheon-toggle">
+              <input
+                type="checkbox"
+                id="greek-toggle"
+                aria-label="Show Greek deity names on the ring" />
+            </label>
+            <span class="ninefold-intro__tradition-line">
+              Greek 🇬🇷: Zeus leads a council of 9 gods to oversee humanity
+            </span>
+          </li>
           <li>India 🇮🇳: The Navartri (Festival)</li>
           <li>China 🇨🇳: The 9 Emperor Gods</li>
           <li>Buddhism ☸️: The 9 &lsquo;unknown men&rsquo;</li>
@@ -583,6 +656,7 @@
           dialog: birthProfileModal,
           natalHub: natalHubEl,
           numericRingRoot: ringEl instanceof HTMLElement ? ringEl : null,
+          snapshotToggleParent: document.getElementById('natal-snapshot-toggle-root'),
         });
       }
 

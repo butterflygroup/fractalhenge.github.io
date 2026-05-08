@@ -275,13 +275,23 @@ export function renderNatalInto(natalHubEl, profile) {
  * @param {HTMLDialogElement | null} opts.dialog
  * @param {HTMLElement | null} opts.natalHub
  * @param {HTMLElement | null} [opts.numericRingRoot] defaults to `#ring-one`
+ * @param {HTMLElement | null} [opts.snapshotToggleParent] mount for natal overlay toggle (defaults to `datetimeCt`)
  * @param {() => void} [opts.onSave]
  */
 export function initBirthProfile(opts) {
-  const { datetimeCt, dialog, natalHub, numericRingRoot: numericRingRootOpt, onSave } =
-    opts;
+  const {
+    datetimeCt,
+    dialog,
+    natalHub,
+    numericRingRoot: numericRingRootOpt,
+    snapshotToggleParent: snapshotToggleParentOpt,
+    onSave,
+  } = opts;
 
   if (!dialog || !natalHub || !datetimeCt) return;
+
+  const snapshotToggleParent =
+    snapshotToggleParentOpt instanceof HTMLElement ? snapshotToggleParentOpt : datetimeCt;
 
   const numericRingRoot =
     numericRingRootOpt instanceof HTMLElement
@@ -349,17 +359,17 @@ export function initBirthProfile(opts) {
     if (!(btn instanceof HTMLButtonElement)) return;
     const profile = loadBirthProfile();
     if (profile) {
-      btn.textContent = 'Edit me';
+      btn.textContent = 'my astrology';
       btn.setAttribute('aria-label', 'Edit birth date, place, and time zone');
     } else {
-      btn.textContent = 'Set Me';
+      btn.textContent = 'set astrology';
       btn.setAttribute('aria-label', 'Set birth date, place, and time zone');
     }
   }
 
   function syncNatalSnapshotOverlayUi() {
     applyNatalSnapshotVisibility(/** @type {HTMLElement} */ (natalHub));
-    const srow = datetimeCt.querySelector('.datetime-ct__snapshot-toggle-row');
+    const srow = snapshotToggleParent.querySelector('.natal-snapshot-toggle-row');
     if (!(srow instanceof HTMLElement)) return;
     const hasProfile = !!loadBirthProfile();
     srow.hidden = !hasProfile;
@@ -367,13 +377,13 @@ export function initBirthProfile(opts) {
     if (!(tbtn instanceof HTMLButtonElement) || srow.hidden) return;
     const userHidden = loadNatalSnapshotUserHidden();
     if (userHidden) {
-      tbtn.textContent = 'Show snapshot';
+      tbtn.textContent = 'show astrology';
       tbtn.setAttribute('aria-pressed', 'false');
-      tbtn.setAttribute('aria-label', 'Show natal snapshot on the ring');
+      tbtn.setAttribute('aria-label', 'Show natal astrology on the ring');
     } else {
-      tbtn.textContent = 'Hide snapshot';
+      tbtn.textContent = 'hide astrology';
       tbtn.setAttribute('aria-pressed', 'true');
-      tbtn.setAttribute('aria-label', 'Hide natal snapshot on the ring');
+      tbtn.setAttribute('aria-label', 'Hide natal astrology on the ring');
     }
   }
 
@@ -383,7 +393,7 @@ export function initBirthProfile(opts) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'datetime-ct__setme';
-    btn.textContent = 'Set Me';
+    btn.textContent = 'set astrology';
     btn.setAttribute('aria-haspopup', 'dialog');
     btn.setAttribute('aria-controls', 'birth-profile-modal');
     row.appendChild(btn);
@@ -401,17 +411,17 @@ export function initBirthProfile(opts) {
     });
   }
 
-  if (!datetimeCt.querySelector('.datetime-ct__snapshot-toggle-row')) {
+  if (!snapshotToggleParent.querySelector('.natal-snapshot-toggle-row')) {
     const srow = document.createElement('div');
-    srow.className = 'datetime-ct__snapshot-toggle-row';
+    srow.className = 'natal-snapshot-toggle-row';
     srow.hidden = true;
     const tbtn = document.createElement('button');
     tbtn.type = 'button';
-    tbtn.className = 'datetime-ct__snapshot-toggle';
+    tbtn.className = 'natal-snapshot-toggle';
     tbtn.setAttribute('data-natal-snapshot-toggle', '');
-    tbtn.textContent = 'Hide snapshot';
+    tbtn.textContent = 'hide astrology';
     tbtn.setAttribute('aria-pressed', 'true');
-    tbtn.setAttribute('aria-label', 'Hide natal snapshot on the ring');
+    tbtn.setAttribute('aria-label', 'Hide natal astrology on the ring');
     tbtn.addEventListener('click', () => {
       setNatalSnapshotUserHidden(!loadNatalSnapshotUserHidden());
       if (!loadNatalSnapshotUserHidden() && numericRingRoot instanceof HTMLElement) {
@@ -420,7 +430,7 @@ export function initBirthProfile(opts) {
       syncNatalSnapshotOverlayUi();
     });
     srow.appendChild(tbtn);
-    datetimeCt.appendChild(srow);
+    snapshotToggleParent.appendChild(srow);
   }
 
   if (tz instanceof HTMLSelectElement) {
