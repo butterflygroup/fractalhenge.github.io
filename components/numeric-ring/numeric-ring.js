@@ -33,7 +33,9 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 const HUB_DECK_ID = 'numeric-ring-hub-deck';
 const HUB_DECK_CLASS = 'numeric-ring__hub-deck';
 const HUB_STACK_CLASS = 'numeric-ring__hub-deck-stack';
+const HUB_DEFINITION_CLASS = 'numeric-ring__hub-definition';
 const DIGIT_HIT_CLASS = 'numeric-ring__digit-hit';
+const SYMBOL_HIT_CLASS = 'numeric-ring__symbol-hit';
 const CARD_HIT_HUB_MOD = 'numeric-ring__card-hit--hub';
 
 /** @type {WeakMap<HTMLElement, AbortController>} */
@@ -87,6 +89,27 @@ function createDeckCardButton(digit, card, onSlotCardActivate) {
   });
 
   return btn;
+}
+
+/**
+ * Flattens body text from slot card `sections` (same shape as emotion/story cards).
+ * @param {object} card
+ * @returns {string[]}
+ */
+function collectCardBodyParagraphs(card) {
+  const out = [];
+  const sections = card && card.sections;
+  if (!Array.isArray(sections)) return out;
+  for (const s of sections) {
+    if (s && Array.isArray(s.bodyParagraphs)) {
+      for (const p of s.bodyParagraphs) {
+        if (typeof p === 'string' && p.trim()) {
+          out.push(p);
+        }
+      }
+    }
+  }
+  return out;
 }
 
 /**
@@ -160,6 +183,8 @@ function dedupeUnorderedPairs(raw) {
  * @param {number} [options.phaseOffsetDeg] — added to every slot angle (chords + labels); default 0. Use with `--nr-digit-angle-nudge-deg: 0` if you want a single coherent rotation instead of CSS-only spokes.
  * @param {Record<string, object[]>} [options.slotCards] — deck chips per digit label string; inner hub panel appears when digit is clicked
  * @param {(detail: { digit: string, card: object }) => void} [options.onSlotCardActivate] — e.g. open modal when a hub chip is chosen
+ * @param {'digit' | 'symbol'} [options.hubDeckTrigger] — `'digit'` (default): hub opens from digit button. `'symbol'`: hub opens from the radial symbol name button when symbol names are shown; digit stays plain.
+ * @param {boolean} [options.hubDeckInlineDefinition] — when true with a single card, hub shows `bodyParagraphs` as prose instead of title chips (e.g. Story Elements definitions).
  * @param {Record<string, string[]>} [options.planetEphemerisByDigit] — optional ephemeris lines per digit (Planets mode); rendered on a separate radial arm
  *
  * When the inner hub deck opens, `root` dispatches {@link NUMERIC_RING_HUB_OPENED_EVENT} (`bubbles: false`, `detail.digit`). Closing from outside uses {@link closeNumericRingHubDeck} ({@link NUMERIC_RING_REQUEST_CLOSE_HUB_EVENT} on `root`).
@@ -269,6 +294,9 @@ export function mountNumericRing(root, options = {}) {
 
   const slotCards = options.slotCards;
   const onSlotCardActivate = options.onSlotCardActivate;
+  const hubDeckTrigger =
+    options.hubDeckTrigger === 'symbol' ? 'symbol' : 'digit';
+  const hubDeckInlineDefinition = Boolean(options.hubDeckInlineDefinition);
 
   /** @type {{ digit: string; button: HTMLButtonElement; cards: object[] }[]} */
   const digitDeckToggles = [];
@@ -287,13 +315,23 @@ export function mountNumericRing(root, options = {}) {
       `calc(-1 * (${digitOrbitRadius}) + var(--nr-digit-radial-nudge, 0px))) ` +
       `translateX(var(--nr-digit-tangent-shift, 0ch))`;
 
+    const deity = symbolNames && symbolNames[text];
+
     const hasDeck =
       slotCards &&
       Array.isArray(slotCards[text]) &&
       slotCards[text].length > 0 &&
       typeof onSlotCardActivate === 'function';
 
-    if (hasDeck) {
+    const useSymbolForHub =
+      hasDeck &&
+      hubDeckTrigger === 'symbol' &&
+      showSymbolNames &&
+      Boolean(deity);
+
+    const useDigitForHub = hasDeck && !useSymbolForHub;
+
+    if (useDigitForHub) {
       const digitBtn = document.createElement('button');
       digitBtn.type = 'button';
       digitBtn.className = DIGIT_HIT_CLASS;
@@ -319,8 +357,6 @@ export function mountNumericRing(root, options = {}) {
 
     outer.appendChild(digitArm);
 
-    const deity = symbolNames && symbolNames[text];
-
     if (showSymbolNames && deity) {
       const rotateLead = `rotate(calc(${angle}deg + var(--nr-digit-angle-nudge-deg, 0deg))) `;
 
@@ -333,10 +369,29 @@ export function mountNumericRing(root, options = {}) {
       const stack = document.createElement('span');
       stack.className = SYMBOL_STACK_CLASS;
 
-      const nameEl = document.createElement('span');
-      nameEl.className = SYMBOL_NAME_CLASS;
-      nameEl.textContent = deity;
-      stack.appendChild(nameEl);
+      if (useSymbolForHub) {
+        const symBtn = document.createElement('button');
+        symBtn.type = 'button';
+        symBtn.className = `${SYMBOL_NAME_CLASS} ${SYMBOL_HIT_CLASS}`;
+        symBtn.textContent = deity;
+        symBtn.setAttribute('aria-controls', HUB_DECK_ID);
+        symBtn.setAttribute('aria-expanded', 'false');
+        symBtn.setAttribute(
+          'aria-label',
+          `${deity}, number ${text}, toggle card deck`
+        );
+        stack.appendChild(symBtn);
+        digitDeckToggles.push({
+          digit: text,
+          button: symBtn,
+          cards: slotCards[text],
+        });
+      } else {
+        const nameEl = document.createElement('span');
+        nameEl.className = SYMBOL_NAME_CLASS;
+        nameEl.textContent = deity;
+        stack.appendChild(nameEl);
+      }
 
       nameArm.appendChild(stack);
       outer.appendChild(nameArm);
@@ -409,9 +464,29 @@ export function mountNumericRing(root, options = {}) {
     function openHub(digit, cards) {
       selectedDigit = digit;
       stack.replaceChildren();
-      for (const card of cards) {
-        stack.appendChild(createDeckCardButton(digit, card, onSlotCardActivate));
+
+      let usedInline = false;
+      if (hubDeckInlineDefinition && cards.length === 1) {
+        const paras = collectCardBodyParagraphs(cards[0]);
+        if (paras.length > 0) {
+          usedInline = true;
+          for (const t of paras) {
+            const p = document.createElement('p');
+            p.className = HUB_DEFINITION_CLASS;
+            p.textContent = t;
+            stack.appendChild(p);
+          }
+          hubDeck.setAttribute('aria-label', 'Story element definition');
+        }
       }
+
+      if (!usedInline) {
+        hubDeck.setAttribute('aria-label', 'Cards for selected number');
+        for (const card of cards) {
+          stack.appendChild(createDeckCardButton(digit, card, onSlotCardActivate));
+        }
+      }
+
       hubDeck.hidden = false;
       hubDeck.setAttribute('aria-hidden', 'false');
       root.classList.add('numeric-ring--hubDeckOpen');

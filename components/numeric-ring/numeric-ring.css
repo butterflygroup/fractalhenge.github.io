@@ -547,6 +547,37 @@
   border-radius: 3px;
 }
 
+/* Hub trigger on radial symbol (e.g. Story Elements) — keep .numeric-ring__symbol-name for layout/CSS */
+.numeric-ring__symbol-hit {
+  pointer-events: auto;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  text-align: inherit;
+  white-space: inherit;
+  max-width: inherit;
+  color: var(--nr-digit-hit-color);
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-block;
+}
+
+.numeric-ring__symbol-hit:hover {
+  color: var(--nr-digit-hit-color-hover);
+}
+
+.numeric-ring__symbol-hit:focus-visible {
+  outline: 2px solid var(--nr-digit-hit-color);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
 .numeric-ring__hub-deck {
   position: absolute;
   inset: 0;
@@ -570,6 +601,23 @@
   max-width: none;
   overflow: visible;
   pointer-events: auto;
+}
+
+.numeric-ring__hub-definition {
+  margin: 0;
+  max-width: min(16ch, 92vw);
+  box-sizing: border-box;
+  text-align: center;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+    sans-serif;
+  font-size: clamp(0.8rem, 2.2vmin, 0.95rem);
+  font-weight: 450;
+  line-height: 1.45;
+  color: #334155;
+}
+
+.numeric-ring__hub-definition + .numeric-ring__hub-definition {
+  margin-top: 0.65em;
 }
 
 .numeric-ring__card-hit {

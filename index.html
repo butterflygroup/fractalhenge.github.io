@@ -16,7 +16,7 @@
       }
     </script>
     <title>Fractal Henge</title>
-    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=medicineDigit1UpLeft1" />
+    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=hub16ch1" />
     <link rel="stylesheet" href="./components/fractal-henge/emotion-modal.css" />
     <link rel="stylesheet" href="./components/fractal-henge/planet-ephemeris.css?v=centerDisclaimer1" />
     <link rel="stylesheet" href="./components/fractal-henge/birth-profile.css?v=natalSnapshotAstrologyBar1" />
@@ -92,8 +92,8 @@
 
       .ninefold-intro__list
         > li:not(.ninefold-intro__item--egypt):not(.ninefold-intro__item--greek):not(
-          .ninefold-intro__item--literary
-        ):not(.ninefold-intro__item--medicine)::before {
+          .ninefold-intro__item--medicine
+        )::before {
         content: '\2022';
         flex: 0 0 1.15em;
         width: 1.15em;
@@ -122,13 +122,21 @@
 
       .ninefold-intro__planets-bar {
         display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 0.5em;
+      }
+
+      .ninefold-intro__planets-bar__row {
+        display: flex;
         flex-wrap: wrap;
         align-items: center;
         justify-content: flex-start;
         gap: 0.35rem 0.5rem;
         width: 100%;
-        max-width: 100%;
-        margin-bottom: 0.5em;
       }
 
       .ninefold-intro__snapshot-toggle-root {
@@ -525,16 +533,29 @@
           these &lsquo;9 gods start showing up&rsquo;
         </p>
         <div class="ninefold-intro__planets-bar">
-          <label class="pantheon-toggle ninefold-intro__planets-row">
-            <span class="ninefold-intro__list-pantheon-toggle">
-              <input
-                type="checkbox"
-                id="planets-toggle"
-                aria-label="Show planet names on the ring" />
-            </span>
-            <span class="ninefold-intro__tradition-line">Planets</span>
-          </label>
-          <div id="natal-snapshot-toggle-root" class="ninefold-intro__snapshot-toggle-root"></div>
+          <div class="ninefold-intro__planets-bar__row">
+            <label class="pantheon-toggle ninefold-intro__planets-row">
+              <span class="ninefold-intro__list-pantheon-toggle">
+                <input
+                  type="checkbox"
+                  id="planets-toggle"
+                  aria-label="Show planet names on the ring" />
+              </span>
+              <span class="ninefold-intro__tradition-line">Planets</span>
+            </label>
+            <div id="natal-snapshot-toggle-root" class="ninefold-intro__snapshot-toggle-root"></div>
+          </div>
+          <div class="ninefold-intro__planets-bar__row">
+            <label class="pantheon-toggle ninefold-intro__planets-row">
+              <span class="ninefold-intro__list-pantheon-toggle">
+                <input
+                  type="checkbox"
+                  id="story-elements-toggle"
+                  aria-label="Show story elements on the ring; choose a number for a definition" />
+              </span>
+              <span class="ninefold-intro__tradition-line">Story elements</span>
+            </label>
+          </div>
         </div>
         <ul class="ninefold-intro__list">
           <li class="ninefold-intro__item ninefold-intro__item--egypt">
@@ -573,15 +594,6 @@
           <li>Etruscans of Italy 🇮🇹: 9 gods that influence the fate of men</li>
           <li>Norse 🇳🇴: the 9 gods that survived the Ragnarök</li>
           <li>Mayan 🇲🇽/🇬🇹: the 9 Night Lords</li>
-          <li class="ninefold-intro__item ninefold-intro__item--literary">
-            <label class="pantheon-toggle ninefold-intro__list-pantheon-toggle">
-              <input
-                type="checkbox"
-                id="literary-toggle"
-                aria-label="Show literary elements on the ring" />
-            </label>
-            <span class="ninefold-intro__tradition-line">Literary elements</span>
-          </li>
           <li class="ninefold-intro__item ninefold-intro__item--medicine">
             <label class="pantheon-toggle ninefold-intro__list-pantheon-toggle">
               <input
@@ -773,7 +785,7 @@
       import {
         mountNumericRing,
         patchPlanetEphemeris,
-      } from './components/numeric-ring/numeric-ring.js?v=medicineRing1';
+      } from './components/numeric-ring/numeric-ring.js?v=hubInline1';
       import { CARDS_BY_DIGIT } from './components/fractal-henge/cards-data.js';
       import { openEmotionCardModal, bindEmotionCardModal } from './components/fractal-henge/emotion-modal.js';
       import { buildPlanetEphemerisByDigit } from './components/fractal-henge/planet-ephemeris.js';
@@ -841,6 +853,38 @@
         '9': 'Style',
       };
 
+      /** @type {Record<string, string>} */
+      const LITERARY_DEFINITIONS = {
+        '1': 'Where a story takes place.',
+        '2': "The author's voice or attitude about what he or she writes.",
+        '3': 'The development of the characters in a story.',
+        '4': 'The feelings a reader gets from a story.',
+        '5': 'Who the narrator is and what information he or she provides.',
+        '6': 'The events that occur in a story.',
+        '7': 'The central idea or lesson about life a story conveys.',
+        '8': 'A struggle or problem a character must overcome.',
+        '9': 'The way an author uses language to write a story.',
+      };
+
+      const STORY_DEFINITION_CARDS_BY_DIGIT = (() => {
+        /** @type {Record<string, Array<{ ordinal: number; ordinalTotal: number; title: string; sections: Array<{ bodyParagraphs: string[] }> }>>} */
+        const out = {};
+        for (const digit of Object.keys(LITERARY_NAMES)) {
+          const title = LITERARY_NAMES[digit];
+          const def = LITERARY_DEFINITIONS[digit];
+          if (!title || !def) continue;
+          out[digit] = [
+            {
+              ordinal: 1,
+              ordinalTotal: 1,
+              title,
+              sections: [{ bodyParagraphs: [def] }],
+            },
+          ];
+        }
+        return out;
+      })();
+
       const MEDICINE_NAMES = {
         '9': 'Ketamine, DXM, Unicorn, Amanita Muscaria',
         '1': 'Cannabis, Hape, Noya Rao',
@@ -859,7 +903,7 @@
       const egyptianToggle = document.getElementById('egyptian-toggle');
       const greekToggle = document.getElementById('greek-toggle');
       const planetsToggle = document.getElementById('planets-toggle');
-      const literaryToggle = document.getElementById('literary-toggle');
+      const storyElementsToggle = document.getElementById('story-elements-toggle');
       const medicineToggle = document.getElementById('medicine-toggle');
       const emotionModal = document.getElementById('emotion-card-modal');
       const planetEphemerisSection = document.getElementById('planet-ephemeris');
@@ -983,7 +1027,8 @@
         const greekOn = greekToggle.checked;
         const egyptianOn = egyptianToggle.checked;
         const planetsOn = planetsToggle.checked;
-        const literaryOn = literaryToggle.checked;
+        const storyElementsOn =
+          storyElementsToggle instanceof HTMLInputElement && storyElementsToggle.checked;
         const medicineAllowed = document.documentElement.classList.contains(
           'site-medicine-unlocked'
         );
@@ -992,12 +1037,12 @@
         }
         const medicineOn = medicineAllowed && medicineToggle.checked;
         const showSymbolNames =
-          greekOn || egyptianOn || planetsOn || literaryOn || medicineOn;
+          greekOn || egyptianOn || planetsOn || storyElementsOn || medicineOn;
         const symbolNames = planetsOn
           ? PLANET_NAMES
           : greekOn
             ? GREEK_NAMES
-            : literaryOn
+            : storyElementsOn
               ? LITERARY_NAMES
               : medicineOn
                 ? MEDICINE_NAMES
@@ -1012,7 +1057,7 @@
             ? undefined
             : greekOn
               ? 'greek'
-              : literaryOn
+              : storyElementsOn
                 ? 'literary'
                 : medicineOn
                   ? 'medicine'
@@ -1022,7 +1067,10 @@
                 planetEphemerisByDigit: buildPlanetEphemerisByDigit(new Date()),
               }
             : {}),
-          slotCards: CARDS_BY_DIGIT,
+          ...(storyElementsOn
+            ? { hubDeckTrigger: 'symbol', hubDeckInlineDefinition: true }
+            : {}),
+          slotCards: storyElementsOn ? STORY_DEFINITION_CARDS_BY_DIGIT : CARDS_BY_DIGIT,
           onSlotCardActivate: ({ card }) => {
             if (emotionModal instanceof HTMLDialogElement) {
               openEmotionCardModal(emotionModal, card);
@@ -1036,7 +1084,7 @@
         if (egyptianToggle.checked) {
           greekToggle.checked = false;
           planetsToggle.checked = false;
-          literaryToggle.checked = false;
+          if (storyElementsToggle instanceof HTMLInputElement) storyElementsToggle.checked = false;
           medicineToggle.checked = false;
         }
         paint();
@@ -1045,7 +1093,7 @@
         if (greekToggle.checked) {
           egyptianToggle.checked = false;
           planetsToggle.checked = false;
-          literaryToggle.checked = false;
+          if (storyElementsToggle instanceof HTMLInputElement) storyElementsToggle.checked = false;
           medicineToggle.checked = false;
         }
         paint();
@@ -1054,20 +1102,22 @@
         if (planetsToggle.checked) {
           egyptianToggle.checked = false;
           greekToggle.checked = false;
-          literaryToggle.checked = false;
+          if (storyElementsToggle instanceof HTMLInputElement) storyElementsToggle.checked = false;
           medicineToggle.checked = false;
         }
         paint();
       });
-      literaryToggle.addEventListener('change', () => {
-        if (literaryToggle.checked) {
-          egyptianToggle.checked = false;
-          greekToggle.checked = false;
-          planetsToggle.checked = false;
-          medicineToggle.checked = false;
-        }
-        paint();
-      });
+      if (storyElementsToggle instanceof HTMLInputElement) {
+        storyElementsToggle.addEventListener('change', () => {
+          if (storyElementsToggle.checked) {
+            egyptianToggle.checked = false;
+            greekToggle.checked = false;
+            planetsToggle.checked = false;
+            medicineToggle.checked = false;
+          }
+          paint();
+        });
+      }
       const medicineAllowed = document.documentElement.classList.contains(
         'site-medicine-unlocked'
       );
@@ -1077,7 +1127,7 @@
             egyptianToggle.checked = false;
             greekToggle.checked = false;
             planetsToggle.checked = false;
-            literaryToggle.checked = false;
+            if (storyElementsToggle instanceof HTMLInputElement) storyElementsToggle.checked = false;
           }
           paint();
         });
