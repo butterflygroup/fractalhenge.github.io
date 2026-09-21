@@ -1,0 +1,83 @@
+/*
+ * Design tokens for the whole page. Every color and font family in index.html and the
+ * component stylesheets resolves to one of these, so re-theming is an edit to this file only.
+ * Load before the component stylesheets.
+ */
+:root {
+  /* Surfaces */
+  --fh-bg: #f4f7fb;
+  --fh-bg-gate: #e8eef6;
+  --fh-surface: #fff;
+  --fh-surface-translucent: rgb(255 255 255 / 0.95);
+  --fh-surface-sunken: #f8fafc;
+  --fh-surface-muted: #f1f5f9;
+  --fh-surface-muted-hover: #e2e8f0;
+
+  /* Text */
+  --fh-text-strong: #0f172a;
+  --fh-text: #334155;
+  --fh-text-soft: #475569;
+  --fh-text-muted: #64748b;
+  --fh-text-faint: #94a3b8;
+
+  /* Lines */
+  --fh-border: #cbd5e1;
+  --fh-border-soft: #e2e8f0;
+  --fh-border-strong: #94a3b8;
+
+  /* Roles */
+  --fh-accent: #2563eb;
+  --fh-accent-hover: #1d4ed8;
+  --fh-danger: #b91c1c;
+  --fh-focus: #0f172a;
+  --fh-primary: #0f172a;
+  --fh-primary-hover: #1e293b;
+  --fh-on-primary: #fff;
+
+  /* Shadow + scrim share one ink color; alpha is applied at the use site */
+  --fh-shadow-rgb: 15 23 42;
+  --fh-backdrop: rgb(15 23 42 / 0.45);
+
+  /* Ring figure: the 9-3-6 triangle reads above the 1-4-2-8-5-7 hexad */
+  --fh-ring: #0f172a;
+  --fh-chord-hexad: #64748b;
+  --fh-chord-triad: #0f172a;
+
+  /* Type: one display serif (headings, ring numerals, prose), one UI sans (controls, labels) */
+  --fh-font-display: 'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia,
+    serif;
+  --fh-font-ui: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+/* Map page tokens onto the ring component's own `--nr-*` API (the component stays standalone). */
+#ring-one {
+  --nr-ring-color: var(--fh-ring);
+  --nr-chord-color: var(--fh-chord-hexad);
+  --nr-chord-triad-color: var(--fh-chord-triad);
+  --nr-num-color: var(--fh-text-strong);
+  --nr-digit-hit-color: var(--fh-accent);
+  --nr-digit-hit-color-hover: var(--fh-accent-hover);
+  --nr-focus-color: var(--fh-focus);
+  --nr-chip-bg: var(--fh-surface);
+  --nr-chip-border: var(--fh-border-strong);
+  --nr-chip-text: var(--fh-text-strong);
+  --nr-ephem-bg: var(--fh-surface-translucent);
+  --nr-ephem-border: var(--fh-border-soft);
+  --nr-ephem-text: var(--fh-text-soft);
+  --nr-hub-text: var(--fh-text);
+  --nr-shadow-rgb: var(--fh-shadow-rgb);
+  --nr-font-numeral: var(--fh-font-display);
+  /* Serif lining numerals sit ~15% smaller than the old sans at equal size; sized up to match, plus a little */
+  --nr-num-size: clamp(1.3rem, 5.2vmin, 2.2rem);
+  /* Larger numerals + junction dots need more air between ring and digit (default 2.5) */
+  --nr-orbit-gap-scale: 3.6;
+  --nr-font-label: var(--fh-font-ui);
+}
+
+/* Phones: every px of numeral gap is taken from the label gutter, so keep it closer to default */
+@media (max-width: 640px) {
+  #ring-one {
+    --nr-orbit-gap-scale: 2.6;
+  }
+}

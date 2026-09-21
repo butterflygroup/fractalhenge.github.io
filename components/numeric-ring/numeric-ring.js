@@ -17,6 +17,11 @@ const MOD_LITERARY_CLASS = 'numeric-ring--literary';
 const MOD_MEDICINE_CLASS = 'numeric-ring--medicine';
 const TRACK_CLASS = 'numeric-ring__track';
 const CHORDS_CLASS = 'numeric-ring__chords';
+const CHORD_GROUP_CLASS_PREFIX = 'numeric-ring__chord--';
+const NODE_CLASS = 'numeric-ring__node';
+/** Fallback radii (SVG user units) for browsers without CSS `r`; keep in sync with `--nr-node-*-radius`. */
+const NODE_RADIUS = 0.028;
+const NODE_GROUP_RADIUS = 0.038;
 const ARM_CLASS = 'numeric-ring__arm';
 const ARM_DIGIT_CLASS = 'numeric-ring__arm--digit';
 const ARM_NAME_CLASS = 'numeric-ring__arm--name';
@@ -148,8 +153,8 @@ function polarToChordXY(rChord, angleDeg) {
 }
 
 /**
- * @param {Iterable<(string|number)[]>} raw
- * @returns {[string, string][]}
+ * @param {Iterable<(string|number)[]>} raw — `[a, b]` or `[a, b, group]`
+ * @returns {[string, string, string | undefined][]}
  */
 function dedupeUnorderedPairs(raw) {
   const seen = new Set();
@@ -164,7 +169,9 @@ function dedupeUnorderedPairs(raw) {
     const key = `${lo}|${hi}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    out.push([lo, hi]);
+    const group =
+      typeof pair[2] === 'string' && /^[a-z][a-z0-9-]*$/i.test(pair[2]) ? pair[2] : undefined;
+    out.push([lo, hi, group]);
   }
 
   return out;
@@ -176,7 +183,8 @@ function dedupeUnorderedPairs(raw) {
  * @param {string[]} [options.labels] — clockwise from top, first item at 12 o'clock
  * @param {string} [options.orbitGap] — CSS length for `--nr-orbit-gap` (digit/deity radial offset beyond ring stroke)
  * @param {string|number} [options.orbitGapScale] — multiplier for orbit gap term (maps to `--nr-orbit-gap-scale`)
- * @param {(string|number)[][]} [options.chords] — unordered digit pairs; duplicates ignored
+ * @param {(string|number)[][]} [options.chords] — unordered digit pairs; duplicates ignored. Optional third item names a group (e.g. `['9', '3', 'triad']`): the line gets `numeric-ring__chord--<group>` and is drawn above ungrouped chords
+ * @param {boolean} [options.showNodes] — dot at each label's ring junction; digits touched by a grouped chord get `numeric-ring__node--<group>`
  * @param {Record<string,string>} [options.symbolNames] — keyed by digit, e.g. `'9'` → `'Ra'`
  * @param {boolean} [options.showSymbolNames] — when true + map, deity label radially outward from digit
  * @param {'greek' | 'literary' | 'medicine'} [options.symbolPantheon] — layout modifiers: `numeric-ring--greek`, `--literary`, `--medicine`
@@ -252,14 +260,21 @@ export function mountNumericRing(root, options = {}) {
   const chordPairs =
     options.chords !== undefined ? dedupeUnorderedPairs(options.chords) : [];
 
-  if (chordPairs.length > 0) {
+  const showNodes = Boolean(options.showNodes);
+
+  if (chordPairs.length > 0 || showNodes) {
     const svg = document.createElementNS(SVG_NS, 'svg');
     svg.setAttribute('viewBox', '-1 -1 2 2');
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     svg.setAttribute('class', CHORDS_CLASS);
     svg.setAttribute('aria-hidden', 'true');
 
-    for (const [d0, d1] of chordPairs) {
+    /** @type {Map<string, string>} */
+    const groupByDigit = new Map();
+    // Ungrouped first so grouped (emphasized) chords paint on top
+    const ordered = [...chordPairs].sort((a, b) => Number(Boolean(a[2])) - Number(Boolean(b[2])));
+
+    for (const [d0, d1, group] of ordered) {
       const a0 = angleForDigit(d0);
       const a1 = angleForDigit(d1);
       if (a0 === null || a1 === null) continue;
@@ -272,8 +287,28 @@ export function mountNumericRing(root, options = {}) {
       line.setAttribute('y1', String(p0.y));
       line.setAttribute('x2', String(p1.x));
       line.setAttribute('y2', String(p1.y));
+      if (group) {
+        line.setAttribute('class', `${CHORD_GROUP_CLASS_PREFIX}${group}`);
+        groupByDigit.set(d0, group);
+        groupByDigit.set(d1, group);
+      }
 
       svg.appendChild(line);
+    }
+
+    if (showNodes) {
+      for (const digit of labels) {
+        const a = angleForDigit(digit);
+        if (a === null) continue;
+        const p = polarToChordXY(junctionRatio, a);
+        const group = groupByDigit.get(digit);
+        const node = document.createElementNS(SVG_NS, 'circle');
+        node.setAttribute('cx', String(p.x));
+        node.setAttribute('cy', String(p.y));
+        node.setAttribute('r', String(group ? NODE_GROUP_RADIUS : NODE_RADIUS));
+        node.setAttribute('class', group ? `${NODE_CLASS} ${NODE_CLASS}--${group}` : NODE_CLASS);
+        svg.appendChild(node);
+      }
     }
 
     if (svg.childElementCount > 0) root.appendChild(svg);

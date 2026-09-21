@@ -9,7 +9,7 @@
   --nr-digit-hit-color: #2563eb;
   --nr-digit-hit-color-hover: #1d4ed8;
   --nr-num-size: clamp(1rem, 4vmin, 1.75rem);
-  --nr-symbol-name-size: clamp(0.55rem, 2.65vmin, 0.92rem);
+  --nr-symbol-name-size: clamp(0.6875rem, 2.65vmin, 0.92rem);
   --nr-name-outset: clamp(0.85rem, 2.85vmin, 1.35rem);
   /* Digit/deity radial offset adds --nr-orbit-gap-scale × this past size/2 + ring-width/2 */
   --nr-orbit-gap: clamp(4px, 0.42em, 10px);
@@ -28,9 +28,31 @@
   --nr-card-first-gap: clamp(2.5rem, 14vmin, 6.5rem);
   --nr-card-stack-gap: 10px;
   --nr-card-step: clamp(36px, 7vmin, 56px);
-  --nr-card-chip-size: clamp(0.52rem, 2.1vmin, 0.72rem);
+  --nr-card-chip-size: clamp(0.6875rem, 2.1vmin, 0.75rem);
   --nr-chord-stroke: 0.014;
   --nr-chord-color: var(--nr-ring-color);
+  /* Chords tagged with a group (third tuple item, e.g. 'triad') can outrank the rest */
+  --nr-chord-triad-stroke: 0.022;
+  --nr-chord-triad-color: var(--nr-ring-color);
+  /* Junction dots where chords meet the ring (`showNodes`); radius in SVG user units (-1..1) */
+  --nr-node-radius: 0.028;
+  --nr-node-triad-radius: 0.038;
+  --nr-node-color: var(--nr-chord-color);
+  --nr-node-triad-color: var(--nr-chord-triad-color);
+
+  /* Surfaces inside the ring: hub deck chips, planet position chips, definition prose */
+  --nr-focus-color: #0f172a;
+  --nr-chip-bg: #ffffff;
+  --nr-chip-border: #94a3b8;
+  --nr-chip-text: #0f172a;
+  --nr-ephem-bg: rgb(255 255 255 / 0.96);
+  --nr-ephem-border: #e2e8f0;
+  --nr-ephem-text: #475569;
+  --nr-hub-text: #334155;
+  --nr-shadow-rgb: 15 23 42;
+  --nr-font-numeral: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+    sans-serif;
+  --nr-font-label: var(--nr-font-numeral);
 
   /* Gap between stacked deck chips in the centered hub panel */
   --nr-hub-deck-gap: 0.5rem;
@@ -67,6 +89,22 @@
   stroke-linecap: butt;
 }
 
+/* Drawn after the plain chords (see mountNumericRing) so the emphasized figure sits on top */
+.numeric-ring__chords line.numeric-ring__chord--triad {
+  stroke: var(--nr-chord-triad-color);
+  stroke-width: var(--nr-chord-triad-stroke);
+}
+
+.numeric-ring__node {
+  r: var(--nr-node-radius);
+  fill: var(--nr-node-color);
+}
+
+.numeric-ring__node--triad {
+  r: var(--nr-node-triad-radius);
+  fill: var(--nr-node-triad-color);
+}
+
 .numeric-ring__label {
   position: absolute;
   z-index: 2;
@@ -77,10 +115,9 @@
   margin-left: calc(-1 * var(--nr-num-size));
   margin-top: calc(-1 * var(--nr-num-size));
   pointer-events: none;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
   font-weight: 600;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-    Helvetica, Arial, sans-serif;
+  font-family: var(--nr-font-numeral);
   font-size: var(--nr-num-size);
   color: var(--nr-num-color);
 }
@@ -163,6 +200,7 @@
 
 .numeric-ring__symbol-name {
   display: inline-block;
+  font-family: var(--nr-font-label);
   font-size: var(--nr-symbol-name-size);
   font-weight: 550;
   line-height: 1.06;
@@ -187,7 +225,7 @@
 
 #ring-one.numeric-ring--literary:not(.numeric-ring--planetEphemeris) .numeric-ring__symbol-name {
   white-space: normal;
-  font-size: clamp(0.5rem, 2.35vmin, 0.82rem);
+  font-size: clamp(0.6875rem, 2.35vmin, 0.82rem);
   line-height: 1.12;
   max-width: min(46vw, 11rem);
 }
@@ -258,7 +296,8 @@
 
 #ring-one.numeric-ring--medicine:not(.numeric-ring--planetEphemeris) .numeric-ring__symbol-name {
   white-space: normal;
-  font-size: clamp(0.46rem, 2.05vmin, 0.72rem);
+  /* Longest labels on the ring: 10px floor (11px elsewhere) so five-word lists still fit a phone */
+  font-size: clamp(0.625rem, 2.05vmin, 0.72rem);
   line-height: 1.1;
   max-width: min(52vw, 13rem);
 }
@@ -548,55 +587,69 @@
 }
 
 /*
- * Narrow screens: the per-digit px nudges above are tuned for desktop and do not shrink with the
- * viewport, so side labels clip. Shrink the ring to leave a label gutter, drop the nudges, and
- * anchor each label by its ring-facing edge instead: shift it outward along its spoke by half its
- * own box (translate % = own size), which scales with label length in every mode.
- * `--egyptian` = any names-on mode.
+ * Label placement. The per-digit px nudges above were hand-tuned for one numeral size and do not
+ * follow font or viewport changes; they now only serve browsers without CSS trig functions.
+ * Everywhere else, anchor each label by its ring-facing edge: shift it outward along its spoke by
+ * half its own box (translate % = own size), which scales with label length in every mode.
  */
+@supports (transform: translate(clamp(-50%, calc(80% * sin(40deg)), 50%), 0)) {
+  /*
+   * The arm is a 2px grid, so a label's auto track overflows from the arm's top-left and the
+   * label ends up half its own size off the spoke (what the px nudges compensate for).
+   * Center the track so the label box is truly centered on the spoke point before anchoring;
+   * the tangent shift only exists to offset that same quirk, so drop it here.
+   */
+  #ring-one.numeric-ring .numeric-ring__arm--name {
+    place-content: center;
+    --nr-digit-tangent-shift: 0ch;
+  }
+
+  /*
+   * Outset is now the real gap between numeral and label edge (the old values were padded to
+   * leave room for the nudges). Two classes: must outrank `.numeric-ring--planetEphemeris`.
+   */
+  #ring-one.numeric-ring {
+    --nr-name-outset: clamp(0.45rem, 1.5vmin, 0.7rem);
+    --nr-planet-title-outset: clamp(0.45rem, 1.5vmin, 0.7rem);
+  }
+
+  #ring-one.numeric-ring .numeric-ring__symbol-name {
+    position: relative;
+    display: inline-block;
+    left: 0 !important;
+    top: 0 !important;
+    /* 80% slope, clamped to half the box: diagonal spokes reach the full shift so a wide
+       label's near corner, not its middle, meets the spoke and stays clear of the numeral */
+    transform: translate(
+      clamp(-50%, calc(80% * sin(var(--nr-slot-deg))), 50%),
+      clamp(-50%, calc(-80% * cos(var(--nr-slot-deg))), 50%)
+    );
+  }
+
+  /* Top/bottom spokes have horizontal room: wrap by width, not one word per line. */
+  #ring-one.numeric-ring--medicine .numeric-ring__label:is([data-nr-digit='9'], [data-nr-digit='4'], [data-nr-digit='5'])
+    .numeric-ring__symbol-name {
+    width: max-content;
+    max-width: 6.5rem;
+  }
+}
+
+/* Narrow screens: shrink the ring to leave a label gutter. `--egyptian` = any names-on mode. */
 @media (max-width: 640px) {
   /* Two classes: must outrank the later `.numeric-ring--planetEphemeris` outset */
   .numeric-ring.numeric-ring--egyptian {
     /* Gutter grows with vmin because label font sizes do */
-    --nr-size: min(72vmin, 22rem, calc(100vw - max(11rem, 47vmin)));
-    --nr-name-outset: clamp(0.6rem, 2.6vmin, 1rem);
-    --nr-planet-title-outset: clamp(0.6rem, 2.6vmin, 1rem);
+    --nr-size: min(72vmin, 22rem, calc(100vw - max(12.25rem, 40vmin)));
+  }
+
+  /* Nine position chips share a small circle here; 8px keeps neighbours from colliding */
+  .numeric-ring.numeric-ring--planetEphemeris .numeric-ring__symbol-ephem-line {
+    font-size: 0.5rem;
   }
 
   /* Planet titles are short; spend the spare gutter on room for the interior position chips */
   .numeric-ring.numeric-ring--planetEphemeris {
-    --nr-size: min(72vmin, 22rem, calc(100vw - max(9rem, 40vmin)));
-  }
-
-  @supports (transform: translate(calc(50% * sin(40deg)), 0)) {
-    /*
-     * The arm is a 2px grid, so a label's auto track overflows from the arm's top-left and the
-     * label ends up half its own size off the spoke (what the desktop nudges compensate for).
-     * Center the track so the label box is truly centered on the spoke point before anchoring;
-     * the tangent shift only exists to offset that same quirk, so drop it here.
-     */
-    #ring-one.numeric-ring .numeric-ring__arm--name {
-      place-content: center;
-      --nr-digit-tangent-shift: 0ch;
-    }
-
-    #ring-one.numeric-ring .numeric-ring__symbol-name {
-      position: relative;
-      display: inline-block;
-      left: 0 !important;
-      top: 0 !important;
-      transform: translate(
-        calc(50% * sin(var(--nr-slot-deg))),
-        calc(-50% * cos(var(--nr-slot-deg)))
-      );
-    }
-
-    /* Top/bottom spokes have horizontal room: wrap by width, not one word per line. */
-    #ring-one.numeric-ring--medicine .numeric-ring__label:is([data-nr-digit='9'], [data-nr-digit='4'], [data-nr-digit='5'])
-      .numeric-ring__symbol-name {
-      width: max-content;
-      max-width: 6.5rem;
-    }
+    --nr-size: min(72vmin, 22rem, calc(100vw - max(9.5rem, 38vmin)));
   }
 }
 
@@ -617,26 +670,27 @@
   max-width: 100%;
   box-sizing: border-box;
   padding: 0.22em 0.42em;
-  background: rgb(255 255 255 / 0.96);
-  border: 1px solid #e2e8f0;
+  background: var(--nr-ephem-bg);
+  border: 1px solid var(--nr-ephem-border);
   border-radius: 6px;
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
+  box-shadow: 0 1px 2px rgb(var(--nr-shadow-rgb) / 0.08);
 }
 
 .numeric-ring--planetEphemeris .numeric-ring__symbol-ephem-line {
-  font-size: clamp(0.42rem, 1.85vmin, 0.64rem);
-  color: #475569;
+  font-size: clamp(0.5625rem, 1.85vmin, 0.66rem);
+  color: var(--nr-ephem-text);
 }
 
 .numeric-ring__symbol-ephem-line {
-  font-size: clamp(0.45rem, 1.95vmin, 0.68rem);
+  font-size: clamp(0.5625rem, 1.95vmin, 0.68rem);
   font-weight: 500;
   line-height: 1.22;
   text-align: center;
   white-space: normal;
   overflow-wrap: break-word;
+  font-family: var(--nr-font-label);
   font-variant-numeric: tabular-nums;
-  color: #64748b;
+  color: var(--nr-ephem-text);
 }
 
 .numeric-ring--planetEphemeris {
@@ -681,6 +735,8 @@
   border: none;
   background: transparent;
   font: inherit;
+  /* `font: inherit` would pull the numeral face from the label wrapper */
+  font-family: var(--nr-font-label);
   font-weight: inherit;
   font-size: inherit;
   line-height: inherit;
@@ -733,12 +789,11 @@
   max-width: min(16ch, 92vw);
   box-sizing: border-box;
   text-align: center;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
-    sans-serif;
+  font-family: var(--nr-font-label);
   font-size: clamp(0.8rem, 2.2vmin, 0.95rem);
   font-weight: 450;
   line-height: 1.45;
-  color: #334155;
+  color: var(--nr-hub-text);
 }
 
 .numeric-ring__hub-definition + .numeric-ring__hub-definition {
@@ -750,21 +805,22 @@
   cursor: pointer;
   margin: 0;
   padding: 0.12em 0.38em 0.14em;
-  border: 1px solid #94a3b8;
+  border: 1px solid var(--nr-chip-border);
   border-radius: 6px;
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--nr-chip-bg);
+  color: var(--nr-chip-text);
+  font-family: var(--nr-font-label);
   font-size: var(--nr-card-chip-size);
   font-weight: 650;
   font-variant-numeric: normal;
   line-height: 1.25;
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.08);
+  box-shadow: 0 1px 2px rgb(var(--nr-shadow-rgb) / 0.08);
   text-align: center;
   transform: rotate(calc(-1 * var(--nr-slot-deg)));
 }
 
 .numeric-ring__card-hit:focus-visible {
-  outline: 2px solid #0f172a;
+  outline: 2px solid var(--nr-focus-color);
   outline-offset: 2px;
 }
 
