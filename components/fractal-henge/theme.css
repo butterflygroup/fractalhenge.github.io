@@ -1,0 +1,153 @@
+/*
+ * Design tokens for the whole page. Every color and font family in index.html and the
+ * component stylesheets resolves to one of these, so re-theming is an edit to this file only.
+ * Load before the component stylesheets.
+ */
+:root {
+  /* Night sky. Native controls (date/time pickers, selects, scrollbars) follow the dark scheme. */
+  color-scheme: dark;
+
+  /* Surfaces: deep indigo page, slightly lifted panels */
+  --fh-bg: #0b1026;
+  --fh-bg-gate: #070b1c;
+  --fh-surface: #151b3a;
+  --fh-surface-translucent: rgb(21 27 58 / 0.94);
+  --fh-surface-sunken: #10152f;
+  --fh-surface-muted: #1b2247;
+  --fh-surface-muted-hover: #262e5c;
+  --fh-field-bg: #0e1330;
+
+  /* Text: warm ivory for emphasis, cool lavender-greys below it (all >= 4.5:1 on --fh-bg except faint) */
+  --fh-text-strong: #f4eedd;
+  --fh-text: #cfd3ea;
+  --fh-text-soft: #aab0d0;
+  --fh-text-muted: #8f96bd;
+  --fh-text-faint: #7a82ab;
+
+  /* Lines */
+  --fh-border: #2c3566;
+  --fh-border-soft: #222a55;
+  --fh-border-strong: #4a5590;
+
+  /* Roles: gold is the single accent (links, selection, focus, the triangle) */
+  --fh-accent: #e3c16f;
+  --fh-accent-hover: #f3d98f;
+  --fh-danger: #ff8f85;
+  --fh-focus: #e3c16f;
+  --fh-primary: #e3c16f;
+  --fh-primary-hover: #f3d98f;
+  --fh-on-primary: #141936;
+
+  /* Shadow + scrim share one ink color; alpha is applied at the use site */
+  --fh-shadow-rgb: 0 0 0;
+  --fh-backdrop: rgb(3 5 15 / 0.72);
+
+  /* Ring figure: the gold 9-3-6 triangle reads above the dusk-blue 1-4-2-8-5-7 hexad */
+  --fh-ring: #3b4579;
+  --fh-chord-hexad: #6772b0;
+  --fh-chord-triad: #e3c16f;
+  --fh-numeral: #f4eedd;
+  /* Numerals/labels that open something: pale gold at rest, full gold on hover */
+  --fh-numeral-action: #ecd9a0;
+  --fh-numeral-action-hover: #ffe9ad;
+  --fh-triad-glow: rgb(227 193 111 / 0.4);
+  /* Enneagram centres (Types view): warm, rose, cool — distinct from the gold accent */
+  --fh-center-body: #e0785a;
+  --fh-center-heart: #d9739a;
+  --fh-center-head: #6aa5e8;
+
+  /*
+   * Sky: a faint glow behind the ring plus three sparse star layers. Pure CSS, no image request.
+   * Star tiles use coprime sizes so the pattern does not visibly repeat.
+   */
+  --fh-bg-image: radial-gradient(ellipse 70% 45% at 50% 0%, rgb(58 69 140 / 0.35), transparent 70%),
+    radial-gradient(1px 1px at 23px 41px, rgb(244 238 221 / 0.7), transparent),
+    radial-gradient(1px 1px at 131px 87px, rgb(207 211 234 / 0.55), transparent),
+    radial-gradient(1.5px 1.5px at 67px 149px, rgb(244 238 221 / 0.45), transparent);
+  --fh-bg-size: 100% 100%, 173px 173px, 211px 211px, 257px 257px;
+
+  /* Type: one display serif (headings, ring numerals, prose), one UI sans (controls, labels) */
+  --fh-font-display: 'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia,
+    serif;
+  --fh-font-ui: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+/* Map page tokens onto the ring component's own `--nr-*` API (the component stays standalone). */
+#ring-one {
+  --nr-ring-color: var(--fh-ring);
+  --nr-chord-color: var(--fh-chord-hexad);
+  --nr-chord-triad-color: var(--fh-chord-triad);
+  --nr-num-color: var(--fh-numeral);
+  --nr-digit-hit-color: var(--fh-numeral-action);
+  --nr-digit-hit-color-hover: var(--fh-numeral-action-hover);
+  --nr-focus-color: var(--fh-focus);
+  --nr-chip-bg: var(--fh-surface);
+  --nr-chip-border: var(--fh-border-strong);
+  --nr-chip-text: var(--fh-text-strong);
+  --nr-ephem-bg: var(--fh-surface-translucent);
+  --nr-ephem-border: var(--fh-border-soft);
+  --nr-ephem-text: var(--fh-text-soft);
+  --nr-hub-text: var(--fh-text);
+  --nr-shadow-rgb: var(--fh-shadow-rgb);
+  --nr-font-numeral: var(--fh-font-display);
+  /* Serif lining numerals sit ~15% smaller than the old sans at equal size; sized up to match, plus a little */
+  --nr-num-size: clamp(1.3rem, 5.2vmin, 2.2rem);
+  /* Larger numerals + junction dots need more air between ring and digit (default 2.5) */
+  --nr-orbit-gap-scale: 3.6;
+  --nr-font-label: var(--fh-font-ui);
+}
+
+/* Phones: every px of numeral gap is taken from the label gutter, so keep it closer to default */
+@media (max-width: 640px) {
+  #ring-one {
+    --nr-orbit-gap-scale: 2.6;
+  }
+}
+
+#ring-one .numeric-ring__sector--body {
+  stroke: var(--fh-center-body);
+}
+
+#ring-one .numeric-ring__sector--heart {
+  stroke: var(--fh-center-heart);
+}
+
+#ring-one .numeric-ring__sector--head {
+  stroke: var(--fh-center-head);
+}
+
+/* The triangle carries a soft halo; the hexad stays flat so the hierarchy holds */
+#ring-one .numeric-ring__chord--triad,
+#ring-one .numeric-ring__node--triad {
+  filter: drop-shadow(0 0 3px var(--fh-triad-glow));
+}
+
+/* Motion shared by page-level surfaces (the ring component carries its own). */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes fh-rise-in {
+    from {
+      opacity: 0;
+      translate: 0 0.5rem;
+    }
+  }
+
+  @keyframes fh-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  dialog[open] {
+    animation: fh-rise-in 0.24s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  dialog[open]::backdrop {
+    animation: fh-fade-in 0.24s ease-out;
+  }
+
+  /* Planets mode reveals this section; it should arrive, not pop */
+  .planet-ephemeris:not([hidden]) {
+    animation: fh-rise-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) 60ms both;
+  }
+}

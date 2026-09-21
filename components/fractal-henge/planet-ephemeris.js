@@ -29,6 +29,44 @@ const EPHEM_BODIES = [
   { name: 'Pluto', body: Astronomy.Body.Pluto },
 ];
 
+/** U+FE0E asks for the text (not emoji) presentation so glyphs take the theme color. */
+const TEXT_PRESENTATION = '\uFE0E';
+
+/** @type {Record<string, string>} */
+export const SIGN_GLYPHS = {
+  Aries: '\u2648',
+  Taurus: '\u2649',
+  Gemini: '\u264A',
+  Cancer: '\u264B',
+  Leo: '\u264C',
+  Virgo: '\u264D',
+  Libra: '\u264E',
+  Scorpio: '\u264F',
+  Sagittarius: '\u2650',
+  Capricorn: '\u2651',
+  Aquarius: '\u2652',
+  Pisces: '\u2653',
+};
+
+/** @type {Record<string, string>} */
+export const BODY_GLYPHS = {
+  Sun: '\u2609',
+  Moon: '\u263D',
+  Mercury: '\u263F',
+  Venus: '\u2640',
+  Mars: '\u2642',
+  Jupiter: '\u2643',
+  Saturn: '\u2644',
+  Uranus: '\u2645',
+  Neptune: '\u2646',
+  Pluto: '\u2647',
+};
+
+/** @param {string | undefined} glyph */
+export function asTextGlyph(glyph) {
+  return glyph ? `${glyph}${TEXT_PRESENTATION}` : '';
+}
+
 const RETRO_DELTA_HOURS = 6;
 
 /**
@@ -158,12 +196,24 @@ export function formatEphemerisPosition(row) {
 }
 
 /**
+ * One-line form for the in-ring chips: `16°36′ ♎`, retrograde marked `℞`.
+ * @param {EphemerisRow} row
+ */
+export function formatEphemerisCompact(row) {
+  const mm = String(row.minuteInSign).padStart(2, '0');
+  const r = row.retrograde ? ' \u211E' : '';
+  return `${row.degreeInSign}°${mm}′ ${asTextGlyph(SIGN_GLYPHS[row.sign])}${r}`;
+}
+
+/**
  * Preformatted hub lines keyed by digit. Single-body spokes: position only (large title is outside the ring).
- * Digit 8 (Mars + Pluto): lines include body name prefix.
+ * Digit 8 (Mars + Pluto): lines include a body prefix (name, or body glyph when `compact`).
  * @param {Date} date
+ * @param {{ compact?: boolean }} [opts] — `compact`: one-line glyph form for the in-ring chips
  * @returns {Record<string, string[]>}
  */
-export function buildPlanetEphemerisByDigit(date) {
+export function buildPlanetEphemerisByDigit(date, opts = {}) {
+  const compact = Boolean(opts.compact);
   const rows = computeEphemerisRows(date);
   const byName = new Map(rows.map((r) => [r.name, r]));
   /** @type {Record<string, string[]>} */
@@ -176,11 +226,16 @@ export function buildPlanetEphemerisByDigit(date) {
     for (const nm of names) {
       const row = byName.get(nm);
       if (row) {
-        lines.push(
-          multiBody
-            ? `${nm} · ${formatEphemerisPosition(row)}`
-            : formatEphemerisPosition(row)
-        );
+        if (compact) {
+          const pos = formatEphemerisCompact(row);
+          lines.push(multiBody ? `${asTextGlyph(BODY_GLYPHS[nm])} ${pos}` : pos);
+        } else {
+          lines.push(
+            multiBody
+              ? `${nm} · ${formatEphemerisPosition(row)}`
+              : formatEphemerisPosition(row)
+          );
+        }
       }
     }
     out[digit] = lines;

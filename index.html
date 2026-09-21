@@ -15,18 +15,30 @@
         /* private mode / disabled storage */
       }
     </script>
+    <meta name="theme-color" content="#0b1026" />
     <title>Fractal Henge</title>
-    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=hub16ch1" />
-    <link rel="stylesheet" href="./components/fractal-henge/emotion-modal.css" />
-    <link rel="stylesheet" href="./components/fractal-henge/planet-ephemeris.css?v=centerDisclaimer1" />
-    <link rel="stylesheet" href="./components/fractal-henge/birth-profile.css?v=natalSnapshotAstrologyBar1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&display=swap" />
+    <link rel="stylesheet" href="./components/fractal-henge/theme.css?v=dataGroups1" />
+    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=dataGroups1" />
+    <link rel="stylesheet" href="./components/fractal-henge/emotion-modal.css?v=nightSky2" />
+    <link rel="stylesheet" href="./components/fractal-henge/planet-ephemeris.css?v=dataGroups1" />
+    <link rel="stylesheet" href="./components/fractal-henge/birth-profile.css?v=dataGroups1" />
     <style>
       body {
         margin: 0;
         min-height: 100dvh;
         display: grid;
         place-items: center;
-        background: #f4f7fb;
+        background-color: var(--fh-bg);
+        background-image: var(--fh-bg-image, none);
+        background-size: var(--fh-bg-size, auto);
+        background-attachment: fixed;
+        color: var(--fh-text);
+        font-family: var(--fh-font-ui);
       }
 
       .ring-page {
@@ -35,7 +47,7 @@
         align-items: center;
         gap: clamp(1.75rem, 5vmin, 3rem);
         padding-inline: clamp(0.75rem, 4vw, 1.5rem);
-        padding-top: clamp(3.5rem, 10vh, 6rem);
+        padding-top: clamp(5.5rem, 11vh, 6.5rem);
         padding-bottom: clamp(1.5rem, 5vh, 2.5rem);
         box-sizing: border-box;
         max-width: 100%;
@@ -44,37 +56,37 @@
       .ninefold-intro {
         max-width: min(42rem, 92vw);
         width: 100%;
-        margin-top: clamp(2.5rem, 7vmin, 4.25rem);
-        color: #334155;
-        font-family: ui-serif, Georgia, 'Times New Roman', serif;
-      }
-
-      /* Planet block + flex gap already separate ring and intro; avoid double spacing */
-      .ring-page:has(#planet-ephemeris:not([hidden])) .ninefold-intro {
+        /* The mode control sits between ring and intro, so the flex gap alone separates them */
         margin-top: clamp(0.5rem, 1.8vmin, 1rem);
+        color: var(--fh-text);
+        font-family: var(--fh-font-display);
       }
 
       .ninefold-intro__title {
         margin: 0 0 0.75rem;
-        font-size: clamp(1.05rem, 2.8vw, 1.35rem);
-        font-weight: 650;
-        color: #0f172a;
+        font-size: clamp(1.6rem, 4.4vw, 2.25rem);
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: var(--fh-text-strong);
         text-align: center;
         line-height: 1.25;
       }
 
       .ninefold-intro__lead {
         margin: 0 0 1rem;
-        font-size: clamp(0.92rem, 2.4vw, 1.05rem);
-        line-height: 1.55;
+        /* Cormorant runs small for its point size; sized up so it reads like the old 1rem body */
+        font-size: clamp(1.15rem, 2.7vw, 1.3rem);
+        font-weight: 500;
+        line-height: 1.5;
         text-align: left;
       }
 
       .ninefold-intro__list {
         margin: 0;
         padding-left: 0;
-        font-size: clamp(0.88rem, 2.2vw, 1rem);
-        line-height: 1.5;
+        font-size: clamp(1.1rem, 2.5vw, 1.22rem);
+        font-weight: 500;
+        line-height: 1.45;
         text-align: left;
         list-style: none;
       }
@@ -90,29 +102,12 @@
         margin-bottom: 0;
       }
 
-      .ninefold-intro__list
-        > li:not(.ninefold-intro__item--egypt):not(.ninefold-intro__item--greek):not(
-          .ninefold-intro__item--medicine
-        )::before {
+      .ninefold-intro__list > li::before {
         content: '\2022';
         flex: 0 0 1.15em;
         width: 1.15em;
         text-align: center;
-        line-height: 1.5;
-        flex-shrink: 0;
-      }
-
-      .ninefold-intro__list-pantheon-toggle {
-        box-sizing: border-box;
-        flex: 0 0 1.15em;
-        width: 1.15em;
-        display: inline-flex;
-        justify-content: center;
-        align-items: flex-start;
-        flex-shrink: 0;
-        color: inherit;
-        line-height: inherit;
-        padding-top: 0.12em;
+        color: var(--fh-text-faint);
       }
 
       .ninefold-intro__tradition-line {
@@ -120,65 +115,158 @@
         min-width: 0;
       }
 
-      .ninefold-intro__planets-bar {
+      /* Mode switch: real radios (keyboard + screen reader for free) drawn as one segmented pill */
+      .ring-controls {
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
-        gap: 0.35rem;
-        width: 100%;
+        align-items: center;
+        gap: 0.6rem;
         max-width: 100%;
-        margin-bottom: 0.5em;
+        /* Bottom ring labels hang below the ring box; clear them in every mode */
+        margin-top: clamp(2.1rem, 5.5vmin, 3rem);
+        font-family: var(--fh-font-ui);
       }
 
-      .ninefold-intro__planets-bar__row {
+      .ring-modes {
         display: flex;
         flex-wrap: wrap;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 0.35rem 0.5rem;
-        width: 100%;
+        justify-content: center;
+        gap: 0.2rem;
+        padding: 0.2rem;
+        border: 1px solid var(--fh-border);
+        border-radius: 999px;
+        background: var(--fh-surface-muted);
       }
 
-      .ninefold-intro__snapshot-toggle-root {
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-      }
-
-      .ninefold-intro .ninefold-intro__planets-row.pantheon-toggle {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        flex: 0 1 auto;
-        min-width: 0;
-        max-width: none;
-        margin-bottom: 0;
-        color: inherit;
-      }
-
-      .ninefold-intro__planets-row .ninefold-intro__list-pantheon-toggle {
-        padding-top: 0;
-        align-items: center;
-      }
-
-      .ninefold-intro__planets-row .ninefold-intro__tradition-line {
-        flex: 0 1 auto;
-      }
-
-      .pantheon-toggle {
-        font: inherit;
+      .ring-modes__option {
+        position: relative;
         cursor: pointer;
         user-select: none;
-        color: #0f172a;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
       }
 
-      .pantheon-toggle input {
-        width: 1rem;
-        height: 1rem;
-        accent-color: #0f172a;
+      .ring-modes__option input {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .ring-modes__option span {
+        display: block;
+        padding: 0.4rem 0.85rem;
+        border-radius: 999px;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        line-height: 1.2;
+        color: var(--fh-text-muted);
+        transition: background-color 0.15s ease, color 0.15s ease;
+      }
+
+      .ring-modes__option:hover span {
+        color: var(--fh-text-strong);
+      }
+
+      .ring-modes__option input:checked + span {
+        background: var(--fh-primary);
+        color: var(--fh-on-primary);
+      }
+
+      .ring-modes__option input:focus-visible + span {
+        outline: 2px solid var(--fh-focus);
+        outline-offset: 2px;
+      }
+
+      /* Phones: tighten the pills so all of them share one row; if they still wrap (very narrow
+         screens with Medicine unlocked), a fully round shell looks broken, so square it off a bit */
+      @media (max-width: 480px) {
+        .ring-modes {
+          gap: 0;
+          border-radius: 1.1rem;
+        }
+
+        .ring-modes__option span {
+          padding: 0.4rem 0.42rem;
+          font-size: 0.72rem;
+        }
+      }
+
+      /* `display: flex` above would defeat the hidden attribute */
+      .ring-modes[hidden] {
+        display: none;
+      }
+
+      /* Second level: quieter shell, outlined selection, and a reserved row so the page below
+         does not jump when a group with no sub-views (Numbers) is chosen */
+      .ring-controls__sub {
+        display: flex;
+        justify-content: center;
+        min-height: 2.3rem;
+      }
+
+      .ring-modes--sub {
+        border-color: transparent;
+        background: transparent;
+      }
+
+      .ring-modes--sub .ring-modes__option input:checked + span {
+        background: transparent;
+        color: var(--fh-accent);
+        box-shadow: inset 0 0 0 1px var(--fh-accent);
+      }
+
+      .ring-legend {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.35rem 1rem;
+        margin: 0;
+        font-size: 0.75rem;
+        color: var(--fh-text-soft);
+      }
+
+      .ring-legend[hidden] {
+        display: none;
+      }
+
+      .ring-legend__item::before {
+        content: '';
+        display: inline-block;
+        width: 0.55rem;
+        height: 0.55rem;
+        margin-right: 0.4rem;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      .ring-legend__item--body::before {
+        color: var(--fh-center-body);
+      }
+
+      .ring-legend__item--heart::before {
+        color: var(--fh-center-heart);
+      }
+
+      .ring-legend__item--head::before {
+        color: var(--fh-center-head);
+      }
+
+      /* The natal card this button shows/hides is not used in Planets view (chart is on the spokes) */
+      .ring-page:has(#ring-one.numeric-ring--planetEphemeris) .ring-controls__aux {
+        display: none;
+      }
+
+      /* Same on phones in any label view, where the card is hidden to keep the ring readable */
+      @media (max-width: 640px) {
+        .ring-page:has(#ring-one.numeric-ring--egyptian) .ring-controls__aux {
+          display: none;
+        }
+      }
+
+      .ring-controls__aux:empty {
+        display: none;
       }
 
       .datetime-ct {
@@ -187,11 +275,10 @@
         right: 1rem;
         z-index: 10;
         max-width: min(50vw, 14rem);
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial, sans-serif;
+        font-family: var(--fh-font-ui);
         font-size: clamp(0.75rem, 2vw, 0.875rem);
         font-variant-numeric: tabular-nums;
-        color: #334155;
+        color: var(--fh-text);
         text-align: right;
         line-height: 1.35;
       }
@@ -203,7 +290,7 @@
       .datetime-ct__time {
         margin-top: 0.15em;
         font-size: 0.92em;
-        color: #64748b;
+        color: var(--fh-text-muted);
       }
 
       .site-lock-btn {
@@ -212,26 +299,70 @@
         right: max(1rem, env(safe-area-inset-right, 0px));
         z-index: 15;
         padding: 0.45rem 0.75rem;
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
-          sans-serif;
+        font-family: var(--fh-font-ui);
         font-size: clamp(0.75rem, 2vw, 0.875rem);
         font-weight: 600;
-        color: #334155;
-        background: #fff;
-        border: 1px solid #cbd5e1;
+        color: var(--fh-text);
+        background: var(--fh-surface);
+        border: 1px solid var(--fh-border);
         border-radius: 8px;
         cursor: pointer;
-        box-shadow: 0 1px 3px rgb(15 23 42 / 0.08);
+        box-shadow: 0 1px 3px rgb(var(--fh-shadow-rgb) / 0.08);
       }
 
       .site-lock-btn:hover {
-        background: #f8fafc;
-        color: #0f172a;
+        background: var(--fh-surface-sunken);
+        color: var(--fh-text-strong);
       }
 
       .site-lock-btn:focus-visible {
-        outline: 2px solid #0f172a;
+        outline: 2px solid var(--fh-focus);
         outline-offset: 2px;
+      }
+
+      /*
+       * Narrow screens: fixed corner chrome lands on ring labels and list text. Make the clock a
+       * top bar that scrolls with the page, and drop Lock into the flow after the content.
+       */
+      @media (max-width: 760px) {
+        body {
+          grid-template-rows: 1fr auto;
+          /* Rotated ring labels inflate scrollable overflow past what is actually painted */
+          overflow-x: hidden;
+          overflow-x: clip;
+        }
+
+        .ring-page {
+          padding-top: clamp(6rem, max(12vh, 22vmin), 8.5rem);
+        }
+
+        .datetime-ct {
+          position: absolute;
+          top: 0.6rem;
+          left: max(0.75rem, env(safe-area-inset-left, 0px));
+          right: max(0.75rem, env(safe-area-inset-right, 0px));
+          max-width: none;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.5rem;
+          text-align: left;
+          /* Full-width bar: let taps through its empty middle to ring labels beneath */
+          pointer-events: none;
+        }
+
+        .datetime-ct > * {
+          pointer-events: auto;
+        }
+
+        .datetime-ct .datetime-ct__setme-row {
+          margin-top: 0;
+        }
+
+        .site-lock-btn {
+          position: static;
+          margin: 0 auto max(1.25rem, env(safe-area-inset-bottom, 0px));
+        }
       }
 
       .ninefold-intro__term {
@@ -248,7 +379,7 @@
       }
 
       .ninefold-intro__term:focus-visible {
-        outline: 2px solid #0f172a;
+        outline: 2px solid var(--fh-focus);
         outline-offset: 2px;
       }
 
@@ -278,18 +409,18 @@
         padding: 0.45rem 0.5rem;
         text-align: left;
         vertical-align: top;
-        border: 1px solid #cbd5e1;
+        border: 1px solid var(--fh-border);
       }
 
       .ninefold-ennead-modal__table th {
-        background: #f1f5f9;
+        background: var(--fh-surface-muted);
         font-weight: 650;
-        color: #0f172a;
+        color: var(--fh-text-strong);
         white-space: nowrap;
       }
 
       .ninefold-ennead-modal__table tbody tr:nth-child(even) {
-        background: #f8fafc;
+        background: var(--fh-surface-sunken);
       }
 
       /* Client-only gate: index.html only; direct URLs to e.g. components/numeric-ring/demo.html are not gated. */
@@ -298,7 +429,7 @@
         pointer-events: none;
       }
 
-      html:not(.site-medicine-unlocked) .ninefold-intro__item--medicine {
+      html:not(.site-medicine-unlocked) .ring-modes__option--medicine {
         display: none !important;
       }
 
@@ -311,26 +442,52 @@
         justify-content: center;
         padding: clamp(1rem, 4vw, 2rem);
         box-sizing: border-box;
-        background: #e8eef6;
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
-          Arial, sans-serif;
+        background-color: var(--fh-bg-gate);
+        background-image: var(--fh-bg-image, none);
+        background-size: var(--fh-bg-size, auto);
+        font-family: var(--fh-font-ui);
+      }
+
+      .site-gate__mark {
+        display: block;
+        width: 4.5rem;
+        height: 4.5rem;
+        margin: 0 auto 0.75rem;
+        fill: none;
+        stroke: var(--fh-ring);
+        stroke-width: 1.25;
+        stroke-linejoin: round;
+      }
+
+      .site-gate__mark-hexad {
+        stroke: var(--fh-chord-hexad);
+        stroke-width: 1;
+      }
+
+      .site-gate__mark-triad {
+        stroke: var(--fh-chord-triad);
+        stroke-width: 1.75;
+        filter: drop-shadow(0 0 2px var(--fh-triad-glow, transparent));
       }
 
       .site-gate__card {
         width: 100%;
         max-width: 22rem;
-        padding: clamp(1.25rem, 4vw, 1.75rem);
-        background: #fff;
-        border-radius: 12px;
-        border: 1px solid #cbd5e1;
-        box-shadow: 0 10px 40px rgb(15 23 42 / 0.12);
+        padding: clamp(1.5rem, 5vw, 2rem) clamp(1.25rem, 4vw, 1.75rem);
+        background: var(--fh-surface-translucent);
+        border-radius: 14px;
+        border: 1px solid var(--fh-border);
+        box-shadow: 0 10px 40px rgb(var(--fh-shadow-rgb) / 0.12);
       }
 
       .site-gate__title {
         margin: 0 0 0.35rem;
-        font-size: clamp(1.1rem, 3.5vw, 1.35rem);
-        font-weight: 650;
-        color: #0f172a;
+        font-family: var(--fh-font-display);
+        font-size: clamp(1.75rem, 5vw, 2.1rem);
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        line-height: 1.15;
+        color: var(--fh-text-strong);
         text-align: center;
       }
 
@@ -338,7 +495,7 @@
         margin: 0 0 1.1rem;
         font-size: 0.9rem;
         line-height: 1.45;
-        color: #64748b;
+        color: var(--fh-text-muted);
         text-align: center;
       }
 
@@ -351,7 +508,7 @@
       .site-gate__label {
         font-size: 0.8rem;
         font-weight: 600;
-        color: #334155;
+        color: var(--fh-text);
       }
 
       .site-gate__input {
@@ -359,20 +516,21 @@
         width: 100%;
         padding: 0.55rem 0.65rem;
         font-size: 1rem;
-        border: 1px solid #94a3b8;
+        border: 1px solid var(--fh-border-strong);
         border-radius: 8px;
-        color: #0f172a;
+        color: var(--fh-text-strong);
+        background: var(--fh-field-bg, var(--fh-surface));
       }
 
       .site-gate__input:focus {
-        outline: 2px solid #0f172a;
+        outline: 2px solid var(--fh-focus);
         outline-offset: 2px;
       }
 
       .site-gate__error {
         margin: 0;
         font-size: 0.85rem;
-        color: #b91c1c;
+        color: var(--fh-danger);
       }
 
       .site-gate__error[hidden] {
@@ -384,19 +542,19 @@
         padding: 0.55rem 1rem;
         font-size: 0.95rem;
         font-weight: 600;
-        color: #fff;
-        background: #0f172a;
+        color: var(--fh-on-primary);
+        background: var(--fh-primary);
         border: none;
         border-radius: 8px;
         cursor: pointer;
       }
 
       .site-gate__submit:hover {
-        background: #1e293b;
+        background: var(--fh-primary-hover);
       }
 
       .site-gate__submit:focus-visible {
-        outline: 2px solid #0f172a;
+        outline: 2px solid var(--fh-focus);
         outline-offset: 2px;
       }
     </style>
@@ -410,6 +568,11 @@
       aria-labelledby="site-gate-title"
       aria-describedby="site-gate-desc">
       <div class="site-gate__card">
+        <svg class="site-gate__mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <circle cx="32" cy="32" r="26" />
+          <polygon class="site-gate__mark-hexad" points="48.7,12.1 40.9,56.4 57.6,27.5 15.3,12.1 23.1,56.4 6.4,27.5" />
+          <polygon class="site-gate__mark-triad" points="32.0,6.0 54.5,45.0 9.5,45.0" />
+        </svg>
         <h1 id="site-gate-title" class="site-gate__title">Fractal Henge</h1>
         <p id="site-gate-desc" class="site-gate__desc">Enter the site password to continue.</p>
         <form class="site-gate__form" data-site-gate-form novalidate>
@@ -491,17 +654,95 @@
       })();
     </script>
     <div id="datetime-ct" class="datetime-ct" aria-live="polite"></div>
-    <button
-      type="button"
-      id="site-lock-btn"
-      class="site-lock-btn"
-      aria-label="Lock site and return to password screen">
-      Lock
-    </button>
     <div class="ring-page">
       <div class="ring-hub-wrap">
         <div id="ring-one" aria-label="Ninefold ring with chords"></div>
         <div id="natal-hub" class="natal-hub natal-hub--empty" aria-live="polite"></div>
+      </div>
+      <div class="ring-controls">
+        <div class="ring-modes" role="radiogroup" aria-label="Kind of view">
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-group" value="numbers" checked />
+            <span>Numbers</span>
+          </label>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-group" value="sky" />
+            <span>Sky</span>
+          </label>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-group" value="gods" />
+            <span>Gods</span>
+          </label>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-group" value="self" />
+            <span>Self</span>
+          </label>
+        </div>
+        <div class="ring-controls__sub">
+        <div
+          class="ring-modes ring-modes--sub"
+          role="radiogroup"
+          aria-label="Sky views"
+          data-ring-group="sky"
+          hidden>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-mode-sky" value="planets" checked />
+            <span>Planets</span>
+          </label>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-mode-sky" value="signs" />
+            <span>Signs</span>
+          </label>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-mode-sky" value="days" />
+            <span>Days</span>
+          </label>
+        </div>
+        <div
+          class="ring-modes ring-modes--sub"
+          role="radiogroup"
+          aria-label="Pantheons"
+          data-ring-group="gods"
+          hidden>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-mode-gods" value="egypt" checked />
+            <span>Egypt</span>
+          </label>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-mode-gods" value="greek" />
+            <span>Greek</span>
+          </label>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-mode-gods" value="india" />
+            <span>India</span>
+          </label>
+        </div>
+        <div
+          class="ring-modes ring-modes--sub"
+          role="radiogroup"
+          aria-label="Self views"
+          data-ring-group="self"
+          hidden>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-mode-self" value="types" checked />
+            <span>Types</span>
+          </label>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-mode-self" value="story" />
+            <span>Story</span>
+          </label>
+          <label class="ring-modes__option ring-modes__option--medicine">
+            <input type="radio" name="ring-mode-self" value="medicine" />
+            <span>Medicine</span>
+          </label>
+        </div>
+        </div>
+        <p id="ring-legend" class="ring-legend" hidden>
+          <span class="ring-legend__item ring-legend__item--body">Body 8 · 9 · 1</span>
+          <span class="ring-legend__item ring-legend__item--heart">Heart 2 · 3 · 4</span>
+          <span class="ring-legend__item ring-legend__item--head">Head 5 · 6 · 7</span>
+        </p>
+        <div id="natal-snapshot-toggle-root" class="ring-controls__aux"></div>
       </div>
       <section
         id="planet-ephemeris"
@@ -509,7 +750,11 @@
         hidden
         aria-live="polite"
         aria-labelledby="planet-ephemeris-heading">
-        <h2 id="planet-ephemeris-heading" class="planet-ephemeris__title">Planet positions on the ring</h2>
+        <h2 id="planet-ephemeris-heading" class="planet-ephemeris__title">Planet positions</h2>
+        <dl id="planet-positions" class="planet-ephemeris__table"></dl>
+        <p id="planet-natal-legend" class="planet-ephemeris__legend" hidden>
+          Gold under a planet&rsquo;s name on the ring is where it stood when you were born.
+        </p>
         <p class="planet-ephemeris__note" hidden>
           Tropical geocentric longitudes appear next to each spoke&rsquo;s label while Planets mode is on. The ring keeps a fixed ninefold mapping.
         </p>
@@ -532,39 +777,8 @@
           Start doing a lot of Breathwork and psychedelics 🍄 anywhere in the world, historically, 📜 and
           these &lsquo;9 gods start showing up&rsquo;
         </p>
-        <div class="ninefold-intro__planets-bar">
-          <div class="ninefold-intro__planets-bar__row">
-            <label class="pantheon-toggle ninefold-intro__planets-row">
-              <span class="ninefold-intro__list-pantheon-toggle">
-                <input
-                  type="checkbox"
-                  id="planets-toggle"
-                  aria-label="Show planet names on the ring" />
-              </span>
-              <span class="ninefold-intro__tradition-line">Planets</span>
-            </label>
-            <div id="natal-snapshot-toggle-root" class="ninefold-intro__snapshot-toggle-root"></div>
-          </div>
-          <div class="ninefold-intro__planets-bar__row">
-            <label class="pantheon-toggle ninefold-intro__planets-row">
-              <span class="ninefold-intro__list-pantheon-toggle">
-                <input
-                  type="checkbox"
-                  id="story-elements-toggle"
-                  aria-label="Show story elements on the ring; choose a number for a definition" />
-              </span>
-              <span class="ninefold-intro__tradition-line">Story elements</span>
-            </label>
-          </div>
-        </div>
         <ul class="ninefold-intro__list">
-          <li class="ninefold-intro__item ninefold-intro__item--egypt">
-            <label class="pantheon-toggle ninefold-intro__list-pantheon-toggle">
-              <input
-                type="checkbox"
-                id="egyptian-toggle"
-                aria-label="Show Egyptian deity names on the ring" />
-            </label>
+          <li>
             <span class="ninefold-intro__tradition-line">
               Egypt 🇪🇬:
               <button
@@ -577,35 +791,23 @@
               </button>
             </span>
           </li>
-          <li class="ninefold-intro__item ninefold-intro__item--greek">
-            <label class="pantheon-toggle ninefold-intro__list-pantheon-toggle">
-              <input
-                type="checkbox"
-                id="greek-toggle"
-                aria-label="Show Greek deity names on the ring" />
-            </label>
-            <span class="ninefold-intro__tradition-line">
-              Greek 🇬🇷: Zeus leads a council of 9 gods to oversee humanity
-            </span>
-          </li>
-          <li>India 🇮🇳: The Navartri (Festival)</li>
+          <li>Greek 🇬🇷: Zeus leads a council of 9 gods to oversee humanity</li>
+          <li>India 🇮🇳: the Navagraha, nine celestial deities; Navratri honours nine forms of Durga</li>
           <li>China 🇨🇳: The 9 Emperor Gods</li>
           <li>Buddhism ☸️: The 9 &lsquo;unknown men&rsquo;</li>
           <li>Etruscans of Italy 🇮🇹: 9 gods that influence the fate of men</li>
           <li>Norse 🇳🇴: the 9 gods that survived the Ragnarök</li>
           <li>Mayan 🇲🇽/🇬🇹: the 9 Night Lords</li>
-          <li class="ninefold-intro__item ninefold-intro__item--medicine">
-            <label class="pantheon-toggle ninefold-intro__list-pantheon-toggle">
-              <input
-                type="checkbox"
-                id="medicine-toggle"
-                aria-label="Show medicine mapping on the ring" />
-            </label>
-            <span class="ninefold-intro__tradition-line">Medicine</span>
-          </li>
         </ul>
       </section>
     </div>
+    <button
+      type="button"
+      id="site-lock-btn"
+      class="site-lock-btn"
+      aria-label="Lock site and return to password screen">
+      Lock
+    </button>
 
     <dialog
       id="emotion-card-modal"
@@ -785,22 +987,33 @@
       import {
         mountNumericRing,
         patchPlanetEphemeris,
-      } from './components/numeric-ring/numeric-ring.js?v=hubInline1';
+      } from './components/numeric-ring/numeric-ring.js?v=dataGroups1';
       import { CARDS_BY_DIGIT } from './components/fractal-henge/cards-data.js';
       import { openEmotionCardModal, bindEmotionCardModal } from './components/fractal-henge/emotion-modal.js';
-      import { buildPlanetEphemerisByDigit } from './components/fractal-henge/planet-ephemeris.js';
-      import { initBirthProfile } from './components/fractal-henge/birth-profile.js';
+      import {
+        asTextGlyph,
+        BODY_GLYPHS,
+        buildPlanetEphemerisByDigit,
+        computeEphemerisRows,
+        formatEphemerisPosition,
+        longitudeToPlacement,
+        PLANET_EPHEM_BODY_NAMES_BY_DIGIT,
+        SIGN_GLYPHS,
+      } from './components/fractal-henge/planet-ephemeris.js';
+      import { initBirthProfile, loadBirthProfile } from './components/fractal-henge/birth-profile.js';
+      import { ascendantTropicalLongitude } from './components/fractal-henge/natal-ascendant.js';
 
       const LABELS = ['9', '1', '2', '3', '4', '5', '6', '7', '8'];
 
+      // Two figures share the ring: the 9-3-6 triangle (emphasized) and the 1-4-2-8-5-7 hexad.
       const CHORDS = [
         ['5', '7'],
         ['5', '8'],
-        ['6', '9'],
-        ['6', '3'],
+        ['6', '9', 'triad'],
+        ['6', '3', 'triad'],
         ['7', '1'],
         ['8', '2'],
-        ['9', '3'],
+        ['9', '3', 'triad'],
         ['1', '4'],
         ['2', '4'],
       ];
@@ -809,7 +1022,7 @@
         '8': 'Shu',
         '9': 'Ra',
         '1': 'Tefnut',
-        '2': 'Nu',
+        '2': 'Nut',
         '3': 'Isis',
         '4': 'Nephthys',
         '5': 'Set',
@@ -866,24 +1079,118 @@
         '9': 'The way an author uses language to write a story.',
       };
 
-      const STORY_DEFINITION_CARDS_BY_DIGIT = (() => {
+      /**
+       * One single-paragraph card per digit, for modes whose label opens a definition in the hub.
+       * @param {Record<string, string>} names
+       * @param {Record<string, string>} definitions
+       */
+      function definitionCards(names, definitions) {
         /** @type {Record<string, Array<{ ordinal: number; ordinalTotal: number; title: string; sections: Array<{ bodyParagraphs: string[] }> }>>} */
         const out = {};
-        for (const digit of Object.keys(LITERARY_NAMES)) {
-          const title = LITERARY_NAMES[digit];
-          const def = LITERARY_DEFINITIONS[digit];
+        for (const digit of Object.keys(names)) {
+          const title = names[digit];
+          const def = definitions[digit];
           if (!title || !def) continue;
           out[digit] = [
-            {
-              ordinal: 1,
-              ordinalTotal: 1,
-              title,
-              sections: [{ bodyParagraphs: [def] }],
-            },
+            { ordinal: 1, ordinalTotal: 1, title, sections: [{ bodyParagraphs: [def] }] },
           ];
         }
         return out;
-      })();
+      }
+
+      /** Signs by ruling planet (modern rulers, so each sign appears once). `\n` = second line. */
+      const sign = (name) => `${asTextGlyph(SIGN_GLYPHS[name])} ${name}`;
+      const SIGN_NAMES = {
+        '9': `${sign('Taurus')}\n${sign('Libra')}`,
+        '1': `${sign('Gemini')}\n${sign('Virgo')}`,
+        '2': sign('Cancer'),
+        '3': sign('Leo'),
+        '4': sign('Pisces'),
+        '5': sign('Aquarius'),
+        '6': sign('Capricorn'),
+        '7': sign('Sagittarius'),
+        '8': `${sign('Aries')}\n${sign('Scorpio')}`,
+      };
+
+      /** [weekday, classical metal] of each spoke's planet. 4 and 5 (Neptune, Uranus) have neither. */
+      const DAY_METAL_NAMES = {
+        '9': ['Friday', 'copper'],
+        '1': ['Wednesday', 'quicksilver'],
+        '2': ['Monday', 'silver'],
+        '3': ['Sunday', 'gold'],
+        '6': ['Saturday', 'lead'],
+        '7': ['Thursday', 'tin'],
+        '8': ['Tuesday', 'iron'],
+      };
+
+      /**
+       * Navagraha on the spokes of their planets. Rahu and Ketu (the lunar nodes) on 5 and 4 is a
+       * placement made for this ring, not a traditional one: those spokes hold the two modern
+       * planets that Jyotish does not use.
+       */
+      const NAVAGRAHA_NAMES = {
+        '9': 'Shukra',
+        '1': 'Budha',
+        '2': 'Chandra',
+        '3': 'Surya',
+        '4': 'Ketu',
+        '5': 'Rahu',
+        '6': 'Shani',
+        '7': 'Guru',
+        '8': 'Mangala',
+      };
+
+      const TYPE_NAMES = {
+        '1': 'Perfectionist',
+        '2': 'Helper',
+        '3': 'Achiever',
+        '4': 'Individualist',
+        '5': 'Observer',
+        '6': 'Loyalist',
+        '7': 'Enthusiast',
+        '8': 'Challenger',
+        '9': 'Peacemaker',
+      };
+
+      /** @type {Record<string, string>} */
+      const TYPE_DEFINITIONS = {
+        '1': 'Principled and exacting; driven to improve things, hard on themselves.',
+        '2': 'Warm and giving; wants to be needed, slow to name their own needs.',
+        '3': 'Driven and adaptable; wants to succeed, can lose themselves in the role.',
+        '4': 'Sensitive and expressive; wants to be authentic, feels something is missing.',
+        '5': 'Private and perceptive; wants to understand, withdraws to save energy.',
+        '6': 'Committed and watchful; wants security, scans for what could go wrong.',
+        '7': 'Quick and optimistic; wants freedom and novelty, avoids discomfort.',
+        '8': 'Direct and protective; wants control of their own life, guards softness.',
+        '9': 'Easygoing and steady; wants peace, goes along and loses their own agenda.',
+      };
+
+      /** Enneagram centres, drawn as arcs outside the ring in Types mode. */
+      const TYPE_SECTORS = [
+        { digits: ['8', '9', '1'], group: 'body' },
+        { digits: ['2', '3', '4'], group: 'heart' },
+        { digits: ['5', '6', '7'], group: 'head' },
+      ];
+
+      /** Direction of stress along the lines; growth runs the other way. */
+      const TYPE_STRESS_NEXT = { 1: '4', 4: '2', 2: '8', 8: '5', 5: '7', 7: '1', 9: '6', 6: '3', 3: '9' };
+
+      /**
+       * Your own note for each line, shown when the line is tapped. Keys are the two numbers,
+       * smaller first. Empty strings show nothing.
+       * @type {Record<string, string>}
+       */
+      const CHORD_NOTES = {
+        '3|6': '',
+        '3|9': '',
+        '6|9': '',
+        '1|4': '',
+        '2|4': '',
+        '2|8': '',
+        '5|8': '',
+        '5|7': '',
+        '1|7': '',
+      };
 
       const MEDICINE_NAMES = {
         '9': 'Ketamine, DXM, Unicorn, Amanita Muscaria',
@@ -900,11 +1207,14 @@
       const ringEl = document.getElementById('ring-one');
       const birthProfileModal = document.getElementById('birth-profile-modal');
       const natalHubEl = document.getElementById('natal-hub');
-      const egyptianToggle = document.getElementById('egyptian-toggle');
-      const greekToggle = document.getElementById('greek-toggle');
-      const planetsToggle = document.getElementById('planets-toggle');
-      const storyElementsToggle = document.getElementById('story-elements-toggle');
-      const medicineToggle = document.getElementById('medicine-toggle');
+      const groupInputs = /** @type {HTMLInputElement[]} */ (
+        Array.from(document.querySelectorAll('input[name="ring-group"]'))
+      );
+      const modeRows = /** @type {HTMLElement[]} */ (
+        Array.from(document.querySelectorAll('[data-ring-group]'))
+      );
+      const ringLegend = document.getElementById('ring-legend');
+      const planetNatalLegend = document.getElementById('planet-natal-legend');
       const emotionModal = document.getElementById('emotion-card-modal');
       const planetEphemerisSection = document.getElementById('planet-ephemeris');
 
@@ -1007,135 +1317,261 @@
           natalHub: natalHubEl,
           numericRingRoot: ringEl instanceof HTMLElement ? ringEl : null,
           snapshotToggleParent: document.getElementById('natal-snapshot-toggle-root'),
+          // Saving or clearing a chart changes the personal lines in Planets mode
+          onSave: () => paint(),
         });
       }
 
-      function syncPlanetInfoSectionVisibility() {
-        if (planetEphemerisSection instanceof HTMLElement) {
-          planetEphemerisSection.hidden = !planetsToggle.checked;
+      /**
+       * One entry per view. `pantheon` picks the ring's label-layout modifier; `cards` swaps the
+       * emotion deck for one-line definitions opened from the label itself; `natal` adds the
+       * viewer's own placements under each name when a birth chart is saved.
+       * @type {Record<string, { names?: Record<string, string | string[]>, pantheon?: string, ephemeris?: boolean, natal?: boolean, cards?: Record<string, object[]>, sectors?: { digits: string[], group: string }[], stress?: boolean, gated?: boolean }>}
+       */
+      const MODES = {
+        numbers: {},
+        planets: { names: PLANET_NAMES, ephemeris: true, natal: true },
+        signs: { names: SIGN_NAMES, pantheon: 'signs' },
+        days: { names: DAY_METAL_NAMES, pantheon: 'days' },
+        egypt: { names: EGYPTIAN_NAMES },
+        greek: { names: GREEK_NAMES, pantheon: 'greek' },
+        india: { names: NAVAGRAHA_NAMES, pantheon: 'india' },
+        types: {
+          names: TYPE_NAMES,
+          pantheon: 'types',
+          cards: definitionCards(TYPE_NAMES, TYPE_DEFINITIONS),
+          sectors: TYPE_SECTORS,
+          stress: true,
+        },
+        story: {
+          names: LITERARY_NAMES,
+          pantheon: 'literary',
+          cards: definitionCards(LITERARY_NAMES, LITERARY_DEFINITIONS),
+        },
+        medicine: { names: MEDICINE_NAMES, pantheon: 'medicine', gated: true },
+      };
+
+      function medicineAllowed() {
+        return document.documentElement.classList.contains('site-medicine-unlocked');
+      }
+
+      /**
+       * Two-level control: a group radio, then that group's own radio row (each row keeps its own
+       * selection, so returning to a group restores the last view). A gated view without the
+       * unlock falls back to the first view in its row.
+       */
+      function currentModeKey() {
+        const group = groupInputs.find((el) => el.checked)?.value ?? 'numbers';
+        const row = modeRows.find((el) => el.dataset.ringGroup === group);
+        if (!row) return 'numbers';
+        const inputs = /** @type {HTMLInputElement[]} */ (Array.from(row.querySelectorAll('input')));
+        let checked = inputs.find((el) => el.checked) ?? inputs[0];
+        if (!checked || !(checked.value in MODES)) return 'numbers';
+        if (MODES[checked.value].gated && !medicineAllowed()) {
+          checked = inputs[0];
+          checked.checked = true;
         }
+        return checked.value;
+      }
+
+      /** Natal rows by body name, or null without a saved chart. */
+      function natalRowsByName() {
+        const profile = loadBirthProfile();
+        if (!profile) return null;
+        const birth = new Date(profile.birthUtcIso);
+        if (Number.isNaN(birth.getTime())) return null;
+        const byName = new Map(computeEphemerisRows(birth).map((r) => [r.name, r]));
+        let rising = null;
+        try {
+          rising = longitudeToPlacement(
+            ascendantTropicalLongitude(birth, profile.latitudeDeg, profile.longitudeDeg)
+          );
+        } catch {
+          rising = null;
+        }
+        return { byName, rising };
+      }
+
+      /** `12° ♌` — short enough to sit under a planet name on a phone. */
+      function natalShort(row) {
+        const r = row.retrograde ? ' ℞' : '';
+        return `${row.degreeInSign}° ${asTextGlyph(SIGN_GLYPHS[row.sign])}${r}`;
+      }
+
+      /** Planet names with the viewer's own placement as a second (gold) line per body. */
+      function namesWithNatal(names, natal) {
+        /** @type {Record<string, string[]>} */
+        const out = {};
+        for (const digit of Object.keys(names)) {
+          const bodies = PLANET_EPHEM_BODY_NAMES_BY_DIGIT[digit] ?? [];
+          const lines = bodies
+            .map((body) => {
+              const row = natal.byName.get(body);
+              if (!row) return null;
+              return bodies.length > 1
+                ? `${asTextGlyph(BODY_GLYPHS[body])} ${natalShort(row)}`
+                : natalShort(row);
+            })
+            .filter(Boolean);
+          out[digit] = [String(names[digit]), ...lines];
+        }
+        return out;
+      }
+
+      const planetPositionsEl = document.getElementById('planet-positions');
+
+      /** @param {{ degreeInSign: number, minuteInSign: number, sign: string, retrograde?: boolean }} row */
+      function positionCell(row, className) {
+        const dd = document.createElement('dd');
+        if (className) dd.className = className;
+        // Tighter than the natal card's `16° 36′`: columns must fit a phone
+        dd.textContent = formatEphemerisPosition({ ...row, retrograde: false }).replace('° ', '°');
+        if (row.retrograde) {
+          const retro = document.createElement('abbr');
+          retro.className = 'planet-ephemeris__retro';
+          retro.title = 'Retrograde';
+          retro.textContent = '℞';
+          dd.append(' ', retro);
+        }
+        return dd;
+      }
+
+      /**
+       * Full-name companion to the glyph chips inside the ring. With a saved chart it gains a
+       * "Yours" column and a Rising row (Rising has no spoke: the ring maps planets).
+       * @param {Date} date
+       */
+      function renderPlanetTable(date) {
+        if (!(planetPositionsEl instanceof HTMLElement)) return;
+        const natal = natalRowsByName();
+        planetPositionsEl.classList.toggle('planet-ephemeris__table--natal', Boolean(natal));
+        if (planetNatalLegend) planetNatalLegend.hidden = !natal;
+
+        const items = computeEphemerisRows(date).map((row) => {
+          const item = document.createElement('div');
+          item.className = 'planet-ephemeris__row';
+          const dt = document.createElement('dt');
+          const glyph = document.createElement('span');
+          glyph.className = 'planet-ephemeris__glyph';
+          glyph.setAttribute('aria-hidden', 'true');
+          glyph.textContent = asTextGlyph(BODY_GLYPHS[row.name]);
+          dt.append(glyph, row.name);
+          item.append(dt, positionCell(row));
+          const mine = natal?.byName.get(row.name);
+          if (mine) item.append(positionCell(mine, 'planet-ephemeris__yours'));
+          return item;
+        });
+
+        if (natal) {
+          const head = document.createElement('div');
+          head.className = 'planet-ephemeris__row planet-ephemeris__row--head';
+          head.setAttribute('aria-hidden', 'true');
+          const blank = document.createElement('dt');
+          const now = document.createElement('dd');
+          now.textContent = 'Now';
+          const yours = document.createElement('dd');
+          yours.className = 'planet-ephemeris__yours';
+          yours.textContent = 'Yours';
+          head.append(blank, now, yours);
+          items.unshift(head);
+
+          if (natal.rising) {
+            const item = document.createElement('div');
+            item.className = 'planet-ephemeris__row';
+            const dt = document.createElement('dt');
+            const glyph = document.createElement('span');
+            glyph.className = 'planet-ephemeris__glyph';
+            glyph.setAttribute('aria-hidden', 'true');
+            glyph.textContent = 'Asc';
+            dt.append(glyph, 'Rising');
+            const none = document.createElement('dd');
+            none.textContent = '—';
+            item.append(dt, none, positionCell(natal.rising, 'planet-ephemeris__yours'));
+            items.push(item);
+          }
+        }
+
+        planetPositionsEl.replaceChildren(...items);
       }
 
       function refreshRingPlanetEphemeris() {
-        if (!planetsToggle.checked || !(ringEl instanceof HTMLElement)) return;
-        patchPlanetEphemeris(ringEl, buildPlanetEphemerisByDigit(new Date()));
+        if (!MODES[currentModeKey()].ephemeris || !(ringEl instanceof HTMLElement)) return;
+        const now = new Date();
+        patchPlanetEphemeris(ringEl, buildPlanetEphemerisByDigit(now, { compact: true }));
+        renderPlanetTable(now);
       }
 
       setInterval(refreshRingPlanetEphemeris, 60000);
 
+      /** First line of a label, flattened, for naming the two ends of a line. */
+      function spokeName(names, digit) {
+        const n = names?.[digit];
+        if (!n) return '';
+        return (Array.isArray(n) ? n[0] : n).replace(/\s*\n\s*/g, ' and ');
+      }
+
       function paint() {
-        const greekOn = greekToggle.checked;
-        const egyptianOn = egyptianToggle.checked;
-        const planetsOn = planetsToggle.checked;
-        const storyElementsOn =
-          storyElementsToggle instanceof HTMLInputElement && storyElementsToggle.checked;
-        const medicineAllowed = document.documentElement.classList.contains(
-          'site-medicine-unlocked'
-        );
-        if (!medicineAllowed && medicineToggle.checked) {
-          medicineToggle.checked = false;
-        }
-        const medicineOn = medicineAllowed && medicineToggle.checked;
-        const showSymbolNames =
-          greekOn || egyptianOn || planetsOn || storyElementsOn || medicineOn;
-        const symbolNames = planetsOn
-          ? PLANET_NAMES
-          : greekOn
-            ? GREEK_NAMES
-            : storyElementsOn
-              ? LITERARY_NAMES
-              : medicineOn
-                ? MEDICINE_NAMES
-                : EGYPTIAN_NAMES;
+        const mode = MODES[currentModeKey()];
+        const natal = mode.natal ? natalRowsByName() : null;
+        const names = natal && mode.names ? namesWithNatal(mode.names, natal) : mode.names;
 
         mountNumericRing(ringEl, {
           labels: LABELS,
           chords: CHORDS,
-          symbolNames,
-          showSymbolNames,
-          symbolPantheon: planetsOn
-            ? undefined
-            : greekOn
-              ? 'greek'
-              : storyElementsOn
-                ? 'literary'
-                : medicineOn
-                  ? 'medicine'
-                  : undefined,
-          ...(planetsOn
-            ? {
-                planetEphemerisByDigit: buildPlanetEphemerisByDigit(new Date()),
-              }
+          showNodes: true,
+          symbolNames: names,
+          showSymbolNames: Boolean(names),
+          symbolPantheon: mode.pantheon,
+          sectors: mode.sectors,
+          ...(mode.ephemeris
+            ? { planetEphemerisByDigit: buildPlanetEphemerisByDigit(new Date(), { compact: true }) }
             : {}),
-          ...(storyElementsOn
-            ? { hubDeckTrigger: 'symbol', hubDeckInlineDefinition: true }
-            : {}),
-          slotCards: storyElementsOn ? STORY_DEFINITION_CARDS_BY_DIGIT : CARDS_BY_DIGIT,
+          ...(mode.cards ? { hubDeckTrigger: 'symbol', hubDeckInlineDefinition: true } : {}),
+          slotCards: mode.cards ?? CARDS_BY_DIGIT,
           onSlotCardActivate: ({ card }) => {
             if (emotionModal instanceof HTMLDialogElement) {
               openEmotionCardModal(emotionModal, card);
             }
           },
+          chordInfo: ({ a, b, group }) => {
+            const lines = [];
+            const nameA = spokeName(mode.names, a);
+            const nameB = spokeName(mode.names, b);
+            if (nameA && nameB) lines.push(`${nameA} and ${nameB}`);
+            if (mode.stress) {
+              const [from, to] = TYPE_STRESS_NEXT[a] === b ? [a, b] : [b, a];
+              lines.push(`Under stress ${from} leans toward ${to}. In growth ${to} leans toward ${from}.`);
+            } else {
+              lines.push(group === 'triad' ? 'A side of the 9 · 3 · 6 triangle' : 'A step on the 1 · 4 · 2 · 8 · 5 · 7 path');
+            }
+            const note = CHORD_NOTES[`${a}|${b}`];
+            if (note) lines.push(note);
+            return { title: `${a} — ${b}`, lines };
+          },
         });
-        syncPlanetInfoSectionVisibility();
+
+        if (planetEphemerisSection instanceof HTMLElement) {
+          planetEphemerisSection.hidden = !mode.ephemeris;
+        }
+        if (mode.ephemeris) renderPlanetTable(new Date());
+        if (ringLegend) ringLegend.hidden = !mode.sectors;
       }
 
-      egyptianToggle.addEventListener('change', () => {
-        if (egyptianToggle.checked) {
-          greekToggle.checked = false;
-          planetsToggle.checked = false;
-          if (storyElementsToggle instanceof HTMLInputElement) storyElementsToggle.checked = false;
-          medicineToggle.checked = false;
-        }
-        paint();
-      });
-      greekToggle.addEventListener('change', () => {
-        if (greekToggle.checked) {
-          egyptianToggle.checked = false;
-          planetsToggle.checked = false;
-          if (storyElementsToggle instanceof HTMLInputElement) storyElementsToggle.checked = false;
-          medicineToggle.checked = false;
-        }
-        paint();
-      });
-      planetsToggle.addEventListener('change', () => {
-        if (planetsToggle.checked) {
-          egyptianToggle.checked = false;
-          greekToggle.checked = false;
-          if (storyElementsToggle instanceof HTMLInputElement) storyElementsToggle.checked = false;
-          medicineToggle.checked = false;
-        }
-        paint();
-      });
-      if (storyElementsToggle instanceof HTMLInputElement) {
-        storyElementsToggle.addEventListener('change', () => {
-          if (storyElementsToggle.checked) {
-            egyptianToggle.checked = false;
-            greekToggle.checked = false;
-            planetsToggle.checked = false;
-            medicineToggle.checked = false;
-          }
+      function syncModeRows() {
+        const group = groupInputs.find((el) => el.checked)?.value ?? 'numbers';
+        for (const row of modeRows) row.hidden = row.dataset.ringGroup !== group;
+      }
+
+      for (const input of groupInputs) {
+        input.addEventListener('change', () => {
+          syncModeRows();
           paint();
         });
       }
-      // Always wire Medicine toggle. `site-medicine-unlocked` may appear only after password
-      // gate success; if listeners were gated on the initial snapshot, toggling Medicine would
-      // not repaint until another pantheon control fired `paint()`.
-      medicineToggle.addEventListener('change', () => {
-        const allowedNow = document.documentElement.classList.contains('site-medicine-unlocked');
-        if (!allowedNow) {
-          medicineToggle.checked = false;
-          paint();
-          return;
-        }
-        if (medicineToggle.checked) {
-          egyptianToggle.checked = false;
-          greekToggle.checked = false;
-          planetsToggle.checked = false;
-          if (storyElementsToggle instanceof HTMLInputElement) storyElementsToggle.checked = false;
-        }
-        paint();
-      });
+      for (const row of modeRows) {
+        row.addEventListener('change', paint);
+      }
+      syncModeRows();
       paint();
       refreshRingPlanetEphemeris();
     </script>
