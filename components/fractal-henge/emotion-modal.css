@@ -6,7 +6,8 @@
   border-radius: 12px;
   box-shadow: 0 25px 50px -12px rgb(var(--fh-shadow-rgb) / 0.25);
   background: var(--fh-surface);
-  color: var(--fh-text-strong);
+  color: var(--fh-text);
+  font-family: var(--fh-font-ui);
   z-index: 100;
 }
 
@@ -28,10 +29,12 @@
 
 .emotion-card-modal__title {
   margin: 0;
-  font-size: clamp(0.95rem, 2.6vmin, 1.1rem);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1.25;
+  font-family: var(--fh-font-display);
+  font-size: clamp(1.3rem, 3.4vmin, 1.6rem);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  color: var(--fh-text-strong);
 }
 
 .emotion-card-modal__subtitle {

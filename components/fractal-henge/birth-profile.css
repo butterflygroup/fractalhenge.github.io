@@ -133,6 +133,8 @@
 .birth-modal__surface {
   position: relative;
   background: var(--fh-surface);
+  color: var(--fh-text);
+  font-family: var(--fh-font-ui);
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--fh-border-soft);
@@ -151,9 +153,10 @@
   margin: 0;
   flex: 1;
   min-width: 0;
-  font-family: var(--fh-font-ui);
-  font-size: 1.1rem;
-  font-weight: 650;
+  font-family: var(--fh-font-display);
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   color: var(--fh-text-strong);
 }
 
@@ -227,6 +230,8 @@
   border: 1px solid var(--fh-border);
   border-radius: 6px;
   font-family: inherit;
+  color: var(--fh-text-strong);
+  background: var(--fh-field-bg, var(--fh-surface));
 }
 
 .birth-modal__select {

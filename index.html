@@ -15,24 +15,28 @@
         /* private mode / disabled storage */
       }
     </script>
+    <meta name="theme-color" content="#0b1026" />
     <title>Fractal Henge</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&display=swap" />
-    <link rel="stylesheet" href="./components/fractal-henge/theme.css?v=tokens1" />
+    <link rel="stylesheet" href="./components/fractal-henge/theme.css?v=nightSky1" />
     <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=triadNodes1" />
-    <link rel="stylesheet" href="./components/fractal-henge/emotion-modal.css?v=tokens1" />
+    <link rel="stylesheet" href="./components/fractal-henge/emotion-modal.css?v=nightSky1" />
     <link rel="stylesheet" href="./components/fractal-henge/planet-ephemeris.css?v=tokens1" />
-    <link rel="stylesheet" href="./components/fractal-henge/birth-profile.css?v=tokens1" />
+    <link rel="stylesheet" href="./components/fractal-henge/birth-profile.css?v=nightSky1" />
     <style>
       body {
         margin: 0;
         min-height: 100dvh;
         display: grid;
         place-items: center;
-        background: var(--fh-bg);
+        background-color: var(--fh-bg);
+        background-image: var(--fh-bg-image, none);
+        background-size: var(--fh-bg-size, auto);
+        background-attachment: fixed;
         color: var(--fh-text);
         font-family: var(--fh-font-ui);
       }
@@ -416,6 +420,7 @@
         border: 1px solid var(--fh-border-strong);
         border-radius: 8px;
         color: var(--fh-text-strong);
+        background: var(--fh-field-bg, var(--fh-surface));
       }
 
       .site-gate__input:focus {

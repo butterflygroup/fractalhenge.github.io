@@ -4,44 +4,63 @@
  * Load before the component stylesheets.
  */
 :root {
-  /* Surfaces */
-  --fh-bg: #f4f7fb;
-  --fh-bg-gate: #e8eef6;
-  --fh-surface: #fff;
-  --fh-surface-translucent: rgb(255 255 255 / 0.95);
-  --fh-surface-sunken: #f8fafc;
-  --fh-surface-muted: #f1f5f9;
-  --fh-surface-muted-hover: #e2e8f0;
+  /* Night sky. Native controls (date/time pickers, selects, scrollbars) follow the dark scheme. */
+  color-scheme: dark;
 
-  /* Text */
-  --fh-text-strong: #0f172a;
-  --fh-text: #334155;
-  --fh-text-soft: #475569;
-  --fh-text-muted: #64748b;
-  --fh-text-faint: #94a3b8;
+  /* Surfaces: deep indigo page, slightly lifted panels */
+  --fh-bg: #0b1026;
+  --fh-bg-gate: #070b1c;
+  --fh-surface: #151b3a;
+  --fh-surface-translucent: rgb(21 27 58 / 0.94);
+  --fh-surface-sunken: #10152f;
+  --fh-surface-muted: #1b2247;
+  --fh-surface-muted-hover: #262e5c;
+  --fh-field-bg: #0e1330;
+
+  /* Text: warm ivory for emphasis, cool lavender-greys below it (all >= 4.5:1 on --fh-bg except faint) */
+  --fh-text-strong: #f4eedd;
+  --fh-text: #cfd3ea;
+  --fh-text-soft: #aab0d0;
+  --fh-text-muted: #8f96bd;
+  --fh-text-faint: #7a82ab;
 
   /* Lines */
-  --fh-border: #cbd5e1;
-  --fh-border-soft: #e2e8f0;
-  --fh-border-strong: #94a3b8;
+  --fh-border: #2c3566;
+  --fh-border-soft: #222a55;
+  --fh-border-strong: #4a5590;
 
-  /* Roles */
-  --fh-accent: #2563eb;
-  --fh-accent-hover: #1d4ed8;
-  --fh-danger: #b91c1c;
-  --fh-focus: #0f172a;
-  --fh-primary: #0f172a;
-  --fh-primary-hover: #1e293b;
-  --fh-on-primary: #fff;
+  /* Roles: gold is the single accent (links, selection, focus, the triangle) */
+  --fh-accent: #e3c16f;
+  --fh-accent-hover: #f3d98f;
+  --fh-danger: #ff8f85;
+  --fh-focus: #e3c16f;
+  --fh-primary: #e3c16f;
+  --fh-primary-hover: #f3d98f;
+  --fh-on-primary: #141936;
 
   /* Shadow + scrim share one ink color; alpha is applied at the use site */
-  --fh-shadow-rgb: 15 23 42;
-  --fh-backdrop: rgb(15 23 42 / 0.45);
+  --fh-shadow-rgb: 0 0 0;
+  --fh-backdrop: rgb(3 5 15 / 0.72);
 
-  /* Ring figure: the 9-3-6 triangle reads above the 1-4-2-8-5-7 hexad */
-  --fh-ring: #0f172a;
-  --fh-chord-hexad: #64748b;
-  --fh-chord-triad: #0f172a;
+  /* Ring figure: the gold 9-3-6 triangle reads above the dusk-blue 1-4-2-8-5-7 hexad */
+  --fh-ring: #3b4579;
+  --fh-chord-hexad: #6772b0;
+  --fh-chord-triad: #e3c16f;
+  --fh-numeral: #f4eedd;
+  /* Numerals/labels that open something: pale gold at rest, full gold on hover */
+  --fh-numeral-action: #ecd9a0;
+  --fh-numeral-action-hover: #ffe9ad;
+  --fh-triad-glow: rgb(227 193 111 / 0.4);
+
+  /*
+   * Sky: a faint glow behind the ring plus three sparse star layers. Pure CSS, no image request.
+   * Star tiles use coprime sizes so the pattern does not visibly repeat.
+   */
+  --fh-bg-image: radial-gradient(ellipse 70% 45% at 50% 0%, rgb(58 69 140 / 0.35), transparent 70%),
+    radial-gradient(1px 1px at 23px 41px, rgb(244 238 221 / 0.7), transparent),
+    radial-gradient(1px 1px at 131px 87px, rgb(207 211 234 / 0.55), transparent),
+    radial-gradient(1.5px 1.5px at 67px 149px, rgb(244 238 221 / 0.45), transparent);
+  --fh-bg-size: 100% 100%, 173px 173px, 211px 211px, 257px 257px;
 
   /* Type: one display serif (headings, ring numerals, prose), one UI sans (controls, labels) */
   --fh-font-display: 'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia,
@@ -55,9 +74,9 @@
   --nr-ring-color: var(--fh-ring);
   --nr-chord-color: var(--fh-chord-hexad);
   --nr-chord-triad-color: var(--fh-chord-triad);
-  --nr-num-color: var(--fh-text-strong);
-  --nr-digit-hit-color: var(--fh-accent);
-  --nr-digit-hit-color-hover: var(--fh-accent-hover);
+  --nr-num-color: var(--fh-numeral);
+  --nr-digit-hit-color: var(--fh-numeral-action);
+  --nr-digit-hit-color-hover: var(--fh-numeral-action-hover);
   --nr-focus-color: var(--fh-focus);
   --nr-chip-bg: var(--fh-surface);
   --nr-chip-border: var(--fh-border-strong);
@@ -80,4 +99,10 @@
   #ring-one {
     --nr-orbit-gap-scale: 2.6;
   }
+}
+
+/* The triangle carries a soft halo; the hexad stays flat so the hierarchy holds */
+#ring-one .numeric-ring__chord--triad,
+#ring-one .numeric-ring__node--triad {
+  filter: drop-shadow(0 0 3px var(--fh-triad-glow));
 }
