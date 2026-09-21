@@ -599,7 +599,8 @@
    * Center the track so the label box is truly centered on the spoke point before anchoring;
    * the tangent shift only exists to offset that same quirk, so drop it here.
    */
-  #ring-one.numeric-ring .numeric-ring__arm--name {
+  #ring-one.numeric-ring .numeric-ring__arm--name,
+  #ring-one.numeric-ring .numeric-ring__arm--planet-ephem {
     place-content: center;
     --nr-digit-tangent-shift: 0ch;
   }
@@ -626,6 +627,31 @@
     );
   }
 
+  /*
+   * Planet position chips: the mirror image — hang inward from a point just inside the ring.
+   * Horizontal shift follows sin^3 so the near-vertical bottom spokes (4, 5) barely move
+   * sideways and do not slide into each other, while the side spokes shift fully.
+   */
+  #ring-one.numeric-ring .numeric-ring__symbol-ephem {
+    transform: translate(
+      clamp(
+        -50%,
+        calc(-130% * sin(var(--nr-slot-deg)) * sin(var(--nr-slot-deg)) * sin(var(--nr-slot-deg))),
+        50%
+      ),
+      clamp(-50%, calc(80% * cos(var(--nr-slot-deg))), 50%)
+    );
+  }
+
+  /* The bottom pair sit 40° apart on a short chord: lean each one away from the other. */
+  #ring-one.numeric-ring .numeric-ring__label[data-nr-digit='4'] .numeric-ring__symbol-ephem {
+    transform: translate(16%, -50%);
+  }
+
+  #ring-one.numeric-ring .numeric-ring__label[data-nr-digit='5'] .numeric-ring__symbol-ephem {
+    transform: translate(-16%, -50%);
+  }
+
   /* Top/bottom spokes have horizontal room: wrap by width, not one word per line. */
   #ring-one.numeric-ring--medicine .numeric-ring__label:is([data-nr-digit='9'], [data-nr-digit='4'], [data-nr-digit='5'])
     .numeric-ring__symbol-name {
@@ -642,9 +668,13 @@
     --nr-size: min(72vmin, 22rem, calc(100vw - max(12.25rem, 40vmin)));
   }
 
-  /* Nine position chips share a small circle here; 8px keeps neighbours from colliding */
+  /* Nine position chips share a small circle here */
   .numeric-ring.numeric-ring--planetEphemeris .numeric-ring__symbol-ephem-line {
-    font-size: 0.5rem;
+    font-size: 0.5625rem;
+  }
+
+  .numeric-ring.numeric-ring--planetEphemeris .numeric-ring__symbol-ephem {
+    padding-inline: 0.45em;
   }
 
   /* Planet titles are short; spend the spare gutter on room for the interior position chips */
@@ -669,15 +699,16 @@
   width: auto;
   max-width: 100%;
   box-sizing: border-box;
-  padding: 0.22em 0.42em;
+  padding: 0.2em 0.6em;
   background: var(--nr-ephem-bg);
   border: 1px solid var(--nr-ephem-border);
-  border-radius: 6px;
+  /* Pill for one line; still reads as a rounded card when a spoke carries two bodies */
+  border-radius: 0.85em;
   box-shadow: 0 1px 2px rgb(var(--nr-shadow-rgb) / 0.08);
 }
 
 .numeric-ring--planetEphemeris .numeric-ring__symbol-ephem-line {
-  font-size: clamp(0.5625rem, 1.85vmin, 0.66rem);
+  font-size: clamp(0.625rem, 1.95vmin, 0.75rem);
   color: var(--nr-ephem-text);
 }
 
@@ -686,8 +717,9 @@
   font-weight: 500;
   line-height: 1.22;
   text-align: center;
-  white-space: normal;
-  overflow-wrap: break-word;
+  /* Lines arrive preformatted (one body per line); never break inside `16°36′ ♎` */
+  white-space: nowrap;
+  font-variant-emoji: text;
   font-family: var(--nr-font-label);
   font-variant-numeric: tabular-nums;
   color: var(--nr-ephem-text);
@@ -695,8 +727,8 @@
 
 .numeric-ring--planetEphemeris {
   --nr-planet-title-outset: clamp(0.98rem, 3.15vmin, 1.48rem);
-  /* Larger fraction moves interior ephemeris radially outward toward the black ring (still inside digit orbit). */
-  --nr-planet-ephem-orbit-fraction: 0.78;
+  /* Fraction of the digit orbit where the chips' outer edge hangs; ~0.73 lands just inside the ring line. */
+  --nr-planet-ephem-orbit-fraction: 0.73;
 }
 
 .numeric-ring__digit-hit {
@@ -840,4 +872,11 @@
 .numeric-ring__card-hit--hub .numeric-ring__card-chip-inner {
   white-space: normal;
   overflow-wrap: break-word;
+}
+
+/* Very narrow phones: the ring is too small for nine position chips; the table below it carries them */
+@media (max-width: 350px) {
+  .numeric-ring--planetEphemeris .numeric-ring__arm--planet-ephem {
+    display: none;
+  }
 }

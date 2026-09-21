@@ -7,10 +7,70 @@
 
 .planet-ephemeris__title {
   margin: 0 0 0.4rem;
-  font-size: clamp(0.85rem, 2.2vw, 0.95rem);
-  font-weight: 650;
+  font-family: var(--fh-font-display);
+  font-size: clamp(1.25rem, 3.2vw, 1.5rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
   color: var(--fh-text-strong);
   text-align: center;
+}
+
+/* Two columns filled top-to-bottom: luminaries + inner planets left, outer planets right */
+.planet-ephemeris__table {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(5, auto);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(0.75rem, 5vw, 2.5rem);
+  max-width: 30rem;
+  margin: 0.5rem auto 0.75rem;
+  font-size: clamp(0.75rem, 2.1vw, 0.875rem);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Very narrow phones: one column, in the natural Sun→Pluto order */
+@media (max-width: 350px) {
+  .planet-ephemeris__table {
+    grid-auto-flow: row;
+    grid-template-rows: none;
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 16rem;
+  }
+}
+
+.planet-ephemeris__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.32rem 0;
+  border-bottom: 1px solid var(--fh-border-soft);
+}
+
+.planet-ephemeris__row dt {
+  color: var(--fh-text-strong);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.planet-ephemeris__row dd {
+  margin: 0;
+  color: var(--fh-text-soft);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.planet-ephemeris__glyph {
+  display: inline-block;
+  width: 1.4em;
+  color: var(--fh-accent);
+  font-variant-emoji: text;
+}
+
+.planet-ephemeris__retro {
+  color: var(--fh-accent);
+  text-decoration: none;
+  cursor: help;
 }
 
 .planet-ephemeris__note {
