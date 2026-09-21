@@ -2,7 +2,8 @@
 
 .ring-hub-wrap {
   position: relative;
-  width: min(72vmin, 22rem);
+  /* Track #ring-one's own `--nr-size` (it shrinks on narrow screens when names are shown) */
+  width: fit-content;
   max-width: 100%;
 }
 

@@ -20,9 +20,9 @@ export function ascendantTropicalLongitude(date, latitudeDeg, longitudeDeg) {
   function horizonForLambda(lambdaDeg) {
     const λ = (Math.PI / 180) * normalizeLongitude(lambdaDeg);
     const vecEct = new Astronomy.Vector(Math.cos(λ), Math.sin(λ), 0, t);
-    const rot = Astronomy.Rotation_ECT_EQJ(date);
-    const vecEqj = Astronomy.RotateVector(rot, vecEct);
-    const eq = Astronomy.EquatorFromVector(vecEqj);
+    const rot = Astronomy.Rotation_ECT_EQD(date);
+    const vecEqd = Astronomy.RotateVector(rot, vecEct);
+    const eq = Astronomy.EquatorFromVector(vecEqd);
     return Astronomy.Horizon(date, observer, eq.ra, eq.dec, null);
   }
 
@@ -61,7 +61,7 @@ export function ascendantTropicalLongitude(date, latitudeDeg, longitudeDeg) {
     const t2 = Astronomy.MakeTime(later);
     const λr = (Math.PI / 180) * normalizeLongitude(λ);
     const vecEct2 = new Astronomy.Vector(Math.cos(λr), Math.sin(λr), 0, t2);
-    const rot2 = Astronomy.Rotation_ECT_EQJ(later);
+    const rot2 = Astronomy.Rotation_ECT_EQD(later);
     const eq2 = Astronomy.EquatorFromVector(Astronomy.RotateVector(rot2, vecEct2));
     const h2 = Astronomy.Horizon(later, observer, eq2.ra, eq2.dec, null).altitude;
     return h2 > h;

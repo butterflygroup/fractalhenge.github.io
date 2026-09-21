@@ -547,6 +547,59 @@
   top: clamp(20px, 1.45vmin, 46px);
 }
 
+/*
+ * Narrow screens: the per-digit px nudges above are tuned for desktop and do not shrink with the
+ * viewport, so side labels clip. Shrink the ring to leave a label gutter, drop the nudges, and
+ * anchor each label by its ring-facing edge instead: shift it outward along its spoke by half its
+ * own box (translate % = own size), which scales with label length in every mode.
+ * `--egyptian` = any names-on mode.
+ */
+@media (max-width: 640px) {
+  /* Two classes: must outrank the later `.numeric-ring--planetEphemeris` outset */
+  .numeric-ring.numeric-ring--egyptian {
+    /* Gutter grows with vmin because label font sizes do */
+    --nr-size: min(72vmin, 22rem, calc(100vw - max(11rem, 47vmin)));
+    --nr-name-outset: clamp(0.6rem, 2.6vmin, 1rem);
+    --nr-planet-title-outset: clamp(0.6rem, 2.6vmin, 1rem);
+  }
+
+  /* Planet titles are short; spend the spare gutter on room for the interior position chips */
+  .numeric-ring.numeric-ring--planetEphemeris {
+    --nr-size: min(72vmin, 22rem, calc(100vw - max(9rem, 40vmin)));
+  }
+
+  @supports (transform: translate(calc(50% * sin(40deg)), 0)) {
+    /*
+     * The arm is a 2px grid, so a label's auto track overflows from the arm's top-left and the
+     * label ends up half its own size off the spoke (what the desktop nudges compensate for).
+     * Center the track so the label box is truly centered on the spoke point before anchoring;
+     * the tangent shift only exists to offset that same quirk, so drop it here.
+     */
+    #ring-one.numeric-ring .numeric-ring__arm--name {
+      place-content: center;
+      --nr-digit-tangent-shift: 0ch;
+    }
+
+    #ring-one.numeric-ring .numeric-ring__symbol-name {
+      position: relative;
+      display: inline-block;
+      left: 0 !important;
+      top: 0 !important;
+      transform: translate(
+        calc(50% * sin(var(--nr-slot-deg))),
+        calc(-50% * cos(var(--nr-slot-deg)))
+      );
+    }
+
+    /* Top/bottom spokes have horizontal room: wrap by width, not one word per line. */
+    #ring-one.numeric-ring--medicine .numeric-ring__label:is([data-nr-digit='9'], [data-nr-digit='4'], [data-nr-digit='5'])
+      .numeric-ring__symbol-name {
+      width: max-content;
+      max-width: 6.5rem;
+    }
+  }
+}
+
 .numeric-ring__symbol-ephem {
   display: flex;
   flex-direction: column;

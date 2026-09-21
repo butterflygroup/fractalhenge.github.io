@@ -16,10 +16,10 @@
       }
     </script>
     <title>Fractal Henge</title>
-    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=hub16ch1" />
+    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=mobileAnchor1" />
     <link rel="stylesheet" href="./components/fractal-henge/emotion-modal.css" />
-    <link rel="stylesheet" href="./components/fractal-henge/planet-ephemeris.css?v=centerDisclaimer1" />
-    <link rel="stylesheet" href="./components/fractal-henge/birth-profile.css?v=natalSnapshotAstrologyBar1" />
+    <link rel="stylesheet" href="./components/fractal-henge/planet-ephemeris.css?v=clearBottomTitles1" />
+    <link rel="stylesheet" href="./components/fractal-henge/birth-profile.css?v=hubWrapFit1" />
     <style>
       body {
         margin: 0;
@@ -232,6 +232,51 @@
       .site-lock-btn:focus-visible {
         outline: 2px solid #0f172a;
         outline-offset: 2px;
+      }
+
+      /*
+       * Narrow screens: fixed corner chrome lands on ring labels and list text. Make the clock a
+       * top bar that scrolls with the page, and drop Lock into the flow after the content.
+       */
+      @media (max-width: 760px) {
+        body {
+          grid-template-rows: 1fr auto;
+          /* Rotated ring labels inflate scrollable overflow past what is actually painted */
+          overflow-x: hidden;
+          overflow-x: clip;
+        }
+
+        .ring-page {
+          padding-top: clamp(6rem, max(12vh, 22vmin), 8.5rem);
+        }
+
+        .datetime-ct {
+          position: absolute;
+          top: 0.6rem;
+          left: max(0.75rem, env(safe-area-inset-left, 0px));
+          right: max(0.75rem, env(safe-area-inset-right, 0px));
+          max-width: none;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.5rem;
+          text-align: left;
+          /* Full-width bar: let taps through its empty middle to ring labels beneath */
+          pointer-events: none;
+        }
+
+        .datetime-ct > * {
+          pointer-events: auto;
+        }
+
+        .datetime-ct .datetime-ct__setme-row {
+          margin-top: 0;
+        }
+
+        .site-lock-btn {
+          position: static;
+          margin: 0 auto max(1.25rem, env(safe-area-inset-bottom, 0px));
+        }
       }
 
       .ninefold-intro__term {
@@ -491,13 +536,6 @@
       })();
     </script>
     <div id="datetime-ct" class="datetime-ct" aria-live="polite"></div>
-    <button
-      type="button"
-      id="site-lock-btn"
-      class="site-lock-btn"
-      aria-label="Lock site and return to password screen">
-      Lock
-    </button>
     <div class="ring-page">
       <div class="ring-hub-wrap">
         <div id="ring-one" aria-label="Ninefold ring with chords"></div>
@@ -606,6 +644,13 @@
         </ul>
       </section>
     </div>
+    <button
+      type="button"
+      id="site-lock-btn"
+      class="site-lock-btn"
+      aria-label="Lock site and return to password screen">
+      Lock
+    </button>
 
     <dialog
       id="emotion-card-modal"
