@@ -24,9 +24,20 @@
   padding: clamp(0.5rem, 2vmin, 1rem);
 }
 
-.ring-hub-wrap:has(#ring-one.numeric-ring--hubDeckOpen) .natal-hub {
+/* Planets view fills the ring with position chips and already shows the chart on the spokes */
+.ring-hub-wrap:has(#ring-one.numeric-ring--hubDeckOpen) .natal-hub,
+.ring-hub-wrap:has(#ring-one.numeric-ring--planetEphemeris) .natal-hub {
   opacity: 0;
   visibility: hidden;
+}
+
+/* Narrow screens shrink the ring in label views; the card would cover it, numerals included.
+   It stays available in Numbers view (full-size ring), and Planets view shows the chart itself. */
+@media (max-width: 640px) {
+  .ring-hub-wrap:has(#ring-one.numeric-ring--egyptian) .natal-hub {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -35,7 +46,8 @@
     transition: opacity 0.2s ease-out, visibility 0s linear 0.2s;
   }
 
-  .ring-hub-wrap:not(:has(#ring-one.numeric-ring--hubDeckOpen)) .natal-hub {
+  .ring-hub-wrap:not(:has(#ring-one.numeric-ring--hubDeckOpen, #ring-one.numeric-ring--planetEphemeris))
+    .natal-hub {
     transition-delay: 0s;
   }
 }

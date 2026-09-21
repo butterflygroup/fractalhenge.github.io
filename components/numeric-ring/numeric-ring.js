@@ -19,6 +19,15 @@ const TRACK_CLASS = 'numeric-ring__track';
 const CHORDS_CLASS = 'numeric-ring__chords';
 const CHORD_GROUP_CLASS_PREFIX = 'numeric-ring__chord--';
 const NODE_CLASS = 'numeric-ring__node';
+const CHORD_HIT_CLASS = 'numeric-ring__chord-hit';
+const CHORD_ACTIVE_CLASS = 'numeric-ring__chord--active';
+const SECTOR_CLASS = 'numeric-ring__sector';
+/** Sector arcs sit this far outside the junction circle (SVG user units), inside the numerals. */
+const SECTOR_RADIUS_OFFSET = 0.05;
+/** Degrees trimmed from each end of a sector arc so neighbours do not touch. */
+const SECTOR_END_PAD_DEG = 4;
+const SYMBOL_LINE_CLASS = 'numeric-ring__symbol-line';
+const HUB_TITLE_MOD = 'numeric-ring__hub-definition--title';
 /** Fallback radii (SVG user units) for browsers without CSS `r`; keep in sync with `--nr-node-*-radius`. */
 const NODE_RADIUS = 0.028;
 const NODE_GROUP_RADIUS = 0.038;
@@ -94,6 +103,30 @@ function createDeckCardButton(digit, card, onSlotCardActivate) {
   });
 
   return btn;
+}
+
+/**
+ * A symbol name is a string (may contain `\n`) or an array of lines; array lines after the first
+ * render as secondary text (`numeric-ring__symbol-line--sub`).
+ * @param {HTMLElement} el
+ * @param {string | string[]} name
+ */
+function fillSymbolName(el, name) {
+  if (!Array.isArray(name)) {
+    el.textContent = name;
+    return;
+  }
+  name.forEach((line, i) => {
+    const span = document.createElement('span');
+    span.className = i === 0 ? SYMBOL_LINE_CLASS : `${SYMBOL_LINE_CLASS} ${SYMBOL_LINE_CLASS}--sub`;
+    span.textContent = line;
+    el.appendChild(span);
+  });
+}
+
+/** @param {string | string[]} name — single-line form for aria labels */
+function flatSymbolName(name) {
+  return (Array.isArray(name) ? name.join(', ') : String(name)).replace(/\s*\n\s*/g, ', ');
 }
 
 /**
@@ -185,9 +218,11 @@ function dedupeUnorderedPairs(raw) {
  * @param {string|number} [options.orbitGapScale] — multiplier for orbit gap term (maps to `--nr-orbit-gap-scale`)
  * @param {(string|number)[][]} [options.chords] — unordered digit pairs; duplicates ignored. Optional third item names a group (e.g. `['9', '3', 'triad']`): the line gets `numeric-ring__chord--<group>` and is drawn above ungrouped chords
  * @param {boolean} [options.showNodes] — dot at each label's ring junction; digits touched by a grouped chord get `numeric-ring__node--<group>`
- * @param {Record<string,string>} [options.symbolNames] — keyed by digit, e.g. `'9'` → `'Ra'`
+ * @param {Record<string, string | string[]>} [options.symbolNames] — keyed by digit, e.g. `'9'` → `'Ra'`. A string may contain `\n`; an array renders one line each, lines after the first as secondary text
+ * @param {{ digits: string[], group: string }[]} [options.sectors] — arcs just outside the ring spanning consecutive digits (e.g. enneagram centres); each gets `numeric-ring__sector--<group>`
+ * @param {(chord: { a: string, b: string, group?: string }) => ({ title?: string, lines?: string[] } | null)} [options.chordInfo] — makes chords clickable: the returned text shows in the hub; return null for a chord with nothing to say
  * @param {boolean} [options.showSymbolNames] — when true + map, deity label radially outward from digit
- * @param {'greek' | 'literary' | 'medicine'} [options.symbolPantheon] — layout modifiers: `numeric-ring--greek`, `--literary`, `--medicine`
+ * @param {string} [options.symbolPantheon] — layout modifier class `numeric-ring--<name>` (`greek`, `literary`, `medicine` have tuned rules; any other slug is available for styling)
  * @param {number} [options.phaseOffsetDeg] — added to every slot angle (chords + labels); default 0. Use with `--nr-digit-angle-nudge-deg: 0` if you want a single coherent rotation instead of CSS-only spokes.
  * @param {Record<string, object[]>} [options.slotCards] — deck chips per digit label string; inner hub panel appears when digit is clicked
  * @param {(detail: { digit: string, card: object }) => void} [options.onSlotCardActivate] — e.g. open modal when a hub chip is chosen
@@ -221,6 +256,18 @@ export function mountNumericRing(root, options = {}) {
   else root.classList.remove(MOD_LITERARY_CLASS);
   if (options.symbolPantheon === 'medicine') root.classList.add(MOD_MEDICINE_CLASS);
   else root.classList.remove(MOD_MEDICINE_CLASS);
+
+  // Any other pantheon slug becomes a modifier class too; forget the previous mount's
+  if (root.dataset.nrPantheon) root.classList.remove(`${DEFAULT_RING_CLASS}--${root.dataset.nrPantheon}`);
+  delete root.dataset.nrPantheon;
+  if (
+    typeof options.symbolPantheon === 'string' &&
+    /^[a-z][a-z0-9-]*$/.test(options.symbolPantheon) &&
+    !['greek', 'literary', 'medicine'].includes(options.symbolPantheon)
+  ) {
+    root.dataset.nrPantheon = options.symbolPantheon;
+    root.classList.add(`${DEFAULT_RING_CLASS}--${options.symbolPantheon}`);
+  }
 
   if (options.orbitGap !== undefined) {
     root.style.setProperty('--nr-orbit-gap', options.orbitGap);
@@ -261,13 +308,41 @@ export function mountNumericRing(root, options = {}) {
     options.chords !== undefined ? dedupeUnorderedPairs(options.chords) : [];
 
   const showNodes = Boolean(options.showNodes);
+  const sectors = Array.isArray(options.sectors) ? options.sectors : [];
+  const chordInfo = typeof options.chordInfo === 'function' ? options.chordInfo : null;
 
-  if (chordPairs.length > 0 || showNodes) {
+  /** @type {{ key: string, a: string, b: string, group?: string, hit: SVGLineElement, line: SVGLineElement }[]} */
+  const chordHits = [];
+
+  if (chordPairs.length > 0 || showNodes || sectors.length > 0) {
     const svg = document.createElementNS(SVG_NS, 'svg');
     svg.setAttribute('viewBox', '-1 -1 2 2');
     svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
     svg.setAttribute('class', CHORDS_CLASS);
-    svg.setAttribute('aria-hidden', 'true');
+    // Purely decorative unless chords are interactive (hit lines carry their own labels)
+    if (!chordInfo) svg.setAttribute('aria-hidden', 'true');
+
+    for (const sector of sectors) {
+      const ds = Array.isArray(sector.digits) ? sector.digits.map(String) : [];
+      const first = angleForDigit(ds[0]);
+      const last = angleForDigit(ds[ds.length - 1]);
+      if (first === null || last === null) continue;
+      const start = first - step / 2 + SECTOR_END_PAD_DEG;
+      let end = last + step / 2 - SECTOR_END_PAD_DEG;
+      while (end <= start) end += 360;
+      const r = junctionRatio + SECTOR_RADIUS_OFFSET;
+      const p0 = polarToChordXY(r, start);
+      const p1 = polarToChordXY(r, end);
+      const path = document.createElementNS(SVG_NS, 'path');
+      path.setAttribute(
+        'd',
+        `M${p0.x} ${p0.y} A${r} ${r} 0 ${end - start > 180 ? 1 : 0} 1 ${p1.x} ${p1.y}`
+      );
+      const group = /^[a-z][a-z0-9-]*$/i.test(String(sector.group)) ? sector.group : '';
+      path.setAttribute('class', group ? `${SECTOR_CLASS} ${SECTOR_CLASS}--${group}` : SECTOR_CLASS);
+      path.setAttribute('aria-hidden', 'true');
+      svg.appendChild(path);
+    }
 
     /** @type {Map<string, string>} */
     const groupByDigit = new Map();
@@ -292,9 +367,26 @@ export function mountNumericRing(root, options = {}) {
         groupByDigit.set(d0, group);
         groupByDigit.set(d1, group);
       }
+      line.setAttribute('aria-hidden', 'true');
 
       svg.appendChild(line);
+
+      if (chordInfo) {
+        // Wide invisible twin: the drawn line is too thin to tap
+        const hit = document.createElementNS(SVG_NS, 'line');
+        for (const attr of ['x1', 'y1', 'x2', 'y2']) hit.setAttribute(attr, line.getAttribute(attr));
+        hit.setAttribute('class', CHORD_HIT_CLASS);
+        hit.setAttribute('role', 'button');
+        hit.setAttribute('tabindex', '0');
+        hit.setAttribute('aria-controls', HUB_DECK_ID);
+        hit.setAttribute('aria-expanded', 'false');
+        hit.setAttribute('aria-label', `Line from ${d0} to ${d1}`);
+        chordHits.push({ key: `chord:${d0}|${d1}`, a: d0, b: d1, group, hit, line });
+      }
     }
+
+    // Hit lines last so they sit above every drawn line
+    for (const { hit } of chordHits) svg.appendChild(hit);
 
     if (showNodes) {
       for (const digit of labels) {
@@ -410,12 +502,12 @@ export function mountNumericRing(root, options = {}) {
         const symBtn = document.createElement('button');
         symBtn.type = 'button';
         symBtn.className = `${SYMBOL_NAME_CLASS} ${SYMBOL_HIT_CLASS}`;
-        symBtn.textContent = deity;
+        fillSymbolName(symBtn, deity);
         symBtn.setAttribute('aria-controls', HUB_DECK_ID);
         symBtn.setAttribute('aria-expanded', 'false');
         symBtn.setAttribute(
           'aria-label',
-          `${deity}, number ${text}, toggle card deck`
+          `${flatSymbolName(deity)}, number ${text}, toggle card deck`
         );
         stack.appendChild(symBtn);
         digitDeckToggles.push({
@@ -426,7 +518,7 @@ export function mountNumericRing(root, options = {}) {
       } else {
         const nameEl = document.createElement('span');
         nameEl.className = SYMBOL_NAME_CLASS;
-        nameEl.textContent = deity;
+        fillSymbolName(nameEl, deity);
         stack.appendChild(nameEl);
       }
 
@@ -466,7 +558,10 @@ export function mountNumericRing(root, options = {}) {
     root.appendChild(outer);
   });
 
-  if (digitDeckToggles.length > 0 && typeof onSlotCardActivate === 'function') {
+  if (
+    (digitDeckToggles.length > 0 && typeof onSlotCardActivate === 'function') ||
+    chordHits.length > 0
+  ) {
     const hubDeck = document.createElement('section');
     hubDeck.id = HUB_DECK_ID;
     hubDeck.className = HUB_DECK_CLASS;
@@ -487,6 +582,11 @@ export function mountNumericRing(root, options = {}) {
       for (const { digit, button } of digitDeckToggles) {
         button.setAttribute('aria-expanded', String(selectedDigit === digit));
       }
+      for (const { key, hit, line } of chordHits) {
+        hit.setAttribute('aria-expanded', String(selectedDigit === key));
+        line.classList.toggle(CHORD_ACTIVE_CLASS, selectedDigit === key);
+      }
+      root.classList.toggle('numeric-ring--chordSelected', String(selectedDigit).startsWith('chord:'));
     }
 
     function closeHub() {
@@ -534,6 +634,49 @@ export function mountNumericRing(root, options = {}) {
           detail: { digit },
         })
       );
+    }
+
+    /** @param {(typeof chordHits)[number]} chord */
+    function openChord(chord) {
+      const info = chordInfo ? chordInfo({ a: chord.a, b: chord.b, group: chord.group }) : null;
+      if (!info) return;
+      selectedDigit = chord.key;
+      stack.replaceChildren();
+      if (info.title) {
+        const t = document.createElement('p');
+        t.className = `${HUB_DEFINITION_CLASS} ${HUB_TITLE_MOD}`;
+        t.textContent = info.title;
+        stack.appendChild(t);
+      }
+      for (const text of info.lines ?? []) {
+        const p = document.createElement('p');
+        p.className = HUB_DEFINITION_CLASS;
+        p.textContent = text;
+        stack.appendChild(p);
+      }
+      hubDeck.setAttribute('aria-label', 'About this line');
+      hubDeck.hidden = false;
+      hubDeck.setAttribute('aria-hidden', 'false');
+      root.classList.add('numeric-ring--hubDeckOpen');
+      updateExpanded();
+      root.dispatchEvent(
+        new CustomEvent(NUMERIC_RING_HUB_OPENED_EVENT, { bubbles: false, detail: { chord: chord.key } })
+      );
+    }
+
+    for (const chord of chordHits) {
+      const toggle = (e) => {
+        e.stopPropagation();
+        if (selectedDigit === chord.key) closeHub();
+        else openChord(chord);
+      };
+      chord.hit.addEventListener('click', toggle);
+      chord.hit.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle(e);
+        }
+      });
     }
 
     for (const { digit, button, cards } of digitDeckToggles) {

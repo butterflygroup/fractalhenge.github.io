@@ -60,6 +60,46 @@
   white-space: nowrap;
 }
 
+/*
+ * With a saved chart each row is name | now | yours: too wide for two columns, so one column.
+ * The three cells share fixed tracks so the columns line up down the table.
+ */
+.planet-ephemeris__table--natal {
+  grid-auto-flow: row;
+  grid-template-rows: none;
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 22rem;
+}
+
+.planet-ephemeris__table--natal .planet-ephemeris__row {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 1fr) minmax(0, 1.25fr) minmax(0, 1.25fr);
+}
+
+.planet-ephemeris__row--head dd {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fh-text-muted);
+}
+
+.planet-ephemeris__row dd.planet-ephemeris__yours {
+  color: var(--fh-accent);
+}
+
+.planet-ephemeris__legend {
+  margin: 0 auto 0.75rem;
+  max-width: 22rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--fh-text-muted);
+  text-align: center;
+}
+
+.planet-ephemeris__legend[hidden] {
+  display: none;
+}
+
 .planet-ephemeris__glyph {
   display: inline-block;
   width: 1.4em;

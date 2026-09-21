@@ -22,11 +22,11 @@
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&display=swap" />
-    <link rel="stylesheet" href="./components/fractal-henge/theme.css?v=motion1" />
-    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=motion1" />
+    <link rel="stylesheet" href="./components/fractal-henge/theme.css?v=dataGroups1" />
+    <link rel="stylesheet" href="./components/numeric-ring/numeric-ring.css?v=dataGroups1" />
     <link rel="stylesheet" href="./components/fractal-henge/emotion-modal.css?v=nightSky2" />
-    <link rel="stylesheet" href="./components/fractal-henge/planet-ephemeris.css?v=table1" />
-    <link rel="stylesheet" href="./components/fractal-henge/birth-profile.css?v=motion1" />
+    <link rel="stylesheet" href="./components/fractal-henge/planet-ephemeris.css?v=dataGroups1" />
+    <link rel="stylesheet" href="./components/fractal-henge/birth-profile.css?v=dataGroups1" />
     <style>
       body {
         margin: 0;
@@ -123,7 +123,7 @@
         gap: 0.6rem;
         max-width: 100%;
         /* Bottom ring labels hang below the ring box; clear them in every mode */
-        margin-top: clamp(1.4rem, 4vmin, 2.25rem);
+        margin-top: clamp(2.1rem, 5.5vmin, 3rem);
         font-family: var(--fh-font-ui);
       }
 
@@ -190,6 +190,78 @@
         .ring-modes__option span {
           padding: 0.4rem 0.42rem;
           font-size: 0.72rem;
+        }
+      }
+
+      /* `display: flex` above would defeat the hidden attribute */
+      .ring-modes[hidden] {
+        display: none;
+      }
+
+      /* Second level: quieter shell, outlined selection, and a reserved row so the page below
+         does not jump when a group with no sub-views (Numbers) is chosen */
+      .ring-controls__sub {
+        display: flex;
+        justify-content: center;
+        min-height: 2.3rem;
+      }
+
+      .ring-modes--sub {
+        border-color: transparent;
+        background: transparent;
+      }
+
+      .ring-modes--sub .ring-modes__option input:checked + span {
+        background: transparent;
+        color: var(--fh-accent);
+        box-shadow: inset 0 0 0 1px var(--fh-accent);
+      }
+
+      .ring-legend {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.35rem 1rem;
+        margin: 0;
+        font-size: 0.75rem;
+        color: var(--fh-text-soft);
+      }
+
+      .ring-legend[hidden] {
+        display: none;
+      }
+
+      .ring-legend__item::before {
+        content: '';
+        display: inline-block;
+        width: 0.55rem;
+        height: 0.55rem;
+        margin-right: 0.4rem;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      .ring-legend__item--body::before {
+        color: var(--fh-center-body);
+      }
+
+      .ring-legend__item--heart::before {
+        color: var(--fh-center-heart);
+      }
+
+      .ring-legend__item--head::before {
+        color: var(--fh-center-head);
+      }
+
+      /* The natal card this button shows/hides is not used in Planets view (chart is on the spokes) */
+      .ring-page:has(#ring-one.numeric-ring--planetEphemeris) .ring-controls__aux {
+        display: none;
+      }
+
+      /* Same on phones in any label view, where the card is hidden to keep the ring readable */
+      @media (max-width: 640px) {
+        .ring-page:has(#ring-one.numeric-ring--egyptian) .ring-controls__aux {
+          display: none;
         }
       }
 
@@ -588,32 +660,88 @@
         <div id="natal-hub" class="natal-hub natal-hub--empty" aria-live="polite"></div>
       </div>
       <div class="ring-controls">
-        <div class="ring-modes" role="radiogroup" aria-label="What the ring shows">
+        <div class="ring-modes" role="radiogroup" aria-label="Kind of view">
           <label class="ring-modes__option">
-            <input type="radio" name="ring-mode" value="numbers" checked />
+            <input type="radio" name="ring-group" value="numbers" checked />
             <span>Numbers</span>
           </label>
           <label class="ring-modes__option">
-            <input type="radio" name="ring-mode" value="planets" />
+            <input type="radio" name="ring-group" value="sky" />
+            <span>Sky</span>
+          </label>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-group" value="gods" />
+            <span>Gods</span>
+          </label>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-group" value="self" />
+            <span>Self</span>
+          </label>
+        </div>
+        <div class="ring-controls__sub">
+        <div
+          class="ring-modes ring-modes--sub"
+          role="radiogroup"
+          aria-label="Sky views"
+          data-ring-group="sky"
+          hidden>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-mode-sky" value="planets" checked />
             <span>Planets</span>
           </label>
           <label class="ring-modes__option">
-            <input type="radio" name="ring-mode" value="story" />
-            <span>Story</span>
+            <input type="radio" name="ring-mode-sky" value="signs" />
+            <span>Signs</span>
           </label>
           <label class="ring-modes__option">
-            <input type="radio" name="ring-mode" value="egypt" />
+            <input type="radio" name="ring-mode-sky" value="days" />
+            <span>Days</span>
+          </label>
+        </div>
+        <div
+          class="ring-modes ring-modes--sub"
+          role="radiogroup"
+          aria-label="Pantheons"
+          data-ring-group="gods"
+          hidden>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-mode-gods" value="egypt" checked />
             <span>Egypt</span>
           </label>
           <label class="ring-modes__option">
-            <input type="radio" name="ring-mode" value="greek" />
+            <input type="radio" name="ring-mode-gods" value="greek" />
             <span>Greek</span>
           </label>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-mode-gods" value="india" />
+            <span>India</span>
+          </label>
+        </div>
+        <div
+          class="ring-modes ring-modes--sub"
+          role="radiogroup"
+          aria-label="Self views"
+          data-ring-group="self"
+          hidden>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-mode-self" value="types" checked />
+            <span>Types</span>
+          </label>
+          <label class="ring-modes__option">
+            <input type="radio" name="ring-mode-self" value="story" />
+            <span>Story</span>
+          </label>
           <label class="ring-modes__option ring-modes__option--medicine">
-            <input type="radio" name="ring-mode" value="medicine" />
+            <input type="radio" name="ring-mode-self" value="medicine" />
             <span>Medicine</span>
           </label>
         </div>
+        </div>
+        <p id="ring-legend" class="ring-legend" hidden>
+          <span class="ring-legend__item ring-legend__item--body">Body 8 · 9 · 1</span>
+          <span class="ring-legend__item ring-legend__item--heart">Heart 2 · 3 · 4</span>
+          <span class="ring-legend__item ring-legend__item--head">Head 5 · 6 · 7</span>
+        </p>
         <div id="natal-snapshot-toggle-root" class="ring-controls__aux"></div>
       </div>
       <section
@@ -624,6 +752,9 @@
         aria-labelledby="planet-ephemeris-heading">
         <h2 id="planet-ephemeris-heading" class="planet-ephemeris__title">Planet positions</h2>
         <dl id="planet-positions" class="planet-ephemeris__table"></dl>
+        <p id="planet-natal-legend" class="planet-ephemeris__legend" hidden>
+          Gold under a planet&rsquo;s name on the ring is where it stood when you were born.
+        </p>
         <p class="planet-ephemeris__note" hidden>
           Tropical geocentric longitudes appear next to each spoke&rsquo;s label while Planets mode is on. The ring keeps a fixed ninefold mapping.
         </p>
@@ -661,7 +792,7 @@
             </span>
           </li>
           <li>Greek 🇬🇷: Zeus leads a council of 9 gods to oversee humanity</li>
-          <li>India 🇮🇳: The Navartri (Festival)</li>
+          <li>India 🇮🇳: the Navagraha, nine celestial deities; Navratri honours nine forms of Durga</li>
           <li>China 🇨🇳: The 9 Emperor Gods</li>
           <li>Buddhism ☸️: The 9 &lsquo;unknown men&rsquo;</li>
           <li>Etruscans of Italy 🇮🇹: 9 gods that influence the fate of men</li>
@@ -856,7 +987,7 @@
       import {
         mountNumericRing,
         patchPlanetEphemeris,
-      } from './components/numeric-ring/numeric-ring.js?v=motion1';
+      } from './components/numeric-ring/numeric-ring.js?v=dataGroups1';
       import { CARDS_BY_DIGIT } from './components/fractal-henge/cards-data.js';
       import { openEmotionCardModal, bindEmotionCardModal } from './components/fractal-henge/emotion-modal.js';
       import {
@@ -865,8 +996,12 @@
         buildPlanetEphemerisByDigit,
         computeEphemerisRows,
         formatEphemerisPosition,
+        longitudeToPlacement,
+        PLANET_EPHEM_BODY_NAMES_BY_DIGIT,
+        SIGN_GLYPHS,
       } from './components/fractal-henge/planet-ephemeris.js';
-      import { initBirthProfile } from './components/fractal-henge/birth-profile.js';
+      import { initBirthProfile, loadBirthProfile } from './components/fractal-henge/birth-profile.js';
+      import { ascendantTropicalLongitude } from './components/fractal-henge/natal-ascendant.js';
 
       const LABELS = ['9', '1', '2', '3', '4', '5', '6', '7', '8'];
 
@@ -887,7 +1022,7 @@
         '8': 'Shu',
         '9': 'Ra',
         '1': 'Tefnut',
-        '2': 'Nu',
+        '2': 'Nut',
         '3': 'Isis',
         '4': 'Nephthys',
         '5': 'Set',
@@ -944,24 +1079,118 @@
         '9': 'The way an author uses language to write a story.',
       };
 
-      const STORY_DEFINITION_CARDS_BY_DIGIT = (() => {
+      /**
+       * One single-paragraph card per digit, for modes whose label opens a definition in the hub.
+       * @param {Record<string, string>} names
+       * @param {Record<string, string>} definitions
+       */
+      function definitionCards(names, definitions) {
         /** @type {Record<string, Array<{ ordinal: number; ordinalTotal: number; title: string; sections: Array<{ bodyParagraphs: string[] }> }>>} */
         const out = {};
-        for (const digit of Object.keys(LITERARY_NAMES)) {
-          const title = LITERARY_NAMES[digit];
-          const def = LITERARY_DEFINITIONS[digit];
+        for (const digit of Object.keys(names)) {
+          const title = names[digit];
+          const def = definitions[digit];
           if (!title || !def) continue;
           out[digit] = [
-            {
-              ordinal: 1,
-              ordinalTotal: 1,
-              title,
-              sections: [{ bodyParagraphs: [def] }],
-            },
+            { ordinal: 1, ordinalTotal: 1, title, sections: [{ bodyParagraphs: [def] }] },
           ];
         }
         return out;
-      })();
+      }
+
+      /** Signs by ruling planet (modern rulers, so each sign appears once). `\n` = second line. */
+      const sign = (name) => `${asTextGlyph(SIGN_GLYPHS[name])} ${name}`;
+      const SIGN_NAMES = {
+        '9': `${sign('Taurus')}\n${sign('Libra')}`,
+        '1': `${sign('Gemini')}\n${sign('Virgo')}`,
+        '2': sign('Cancer'),
+        '3': sign('Leo'),
+        '4': sign('Pisces'),
+        '5': sign('Aquarius'),
+        '6': sign('Capricorn'),
+        '7': sign('Sagittarius'),
+        '8': `${sign('Aries')}\n${sign('Scorpio')}`,
+      };
+
+      /** [weekday, classical metal] of each spoke's planet. 4 and 5 (Neptune, Uranus) have neither. */
+      const DAY_METAL_NAMES = {
+        '9': ['Friday', 'copper'],
+        '1': ['Wednesday', 'quicksilver'],
+        '2': ['Monday', 'silver'],
+        '3': ['Sunday', 'gold'],
+        '6': ['Saturday', 'lead'],
+        '7': ['Thursday', 'tin'],
+        '8': ['Tuesday', 'iron'],
+      };
+
+      /**
+       * Navagraha on the spokes of their planets. Rahu and Ketu (the lunar nodes) on 5 and 4 is a
+       * placement made for this ring, not a traditional one: those spokes hold the two modern
+       * planets that Jyotish does not use.
+       */
+      const NAVAGRAHA_NAMES = {
+        '9': 'Shukra',
+        '1': 'Budha',
+        '2': 'Chandra',
+        '3': 'Surya',
+        '4': 'Ketu',
+        '5': 'Rahu',
+        '6': 'Shani',
+        '7': 'Guru',
+        '8': 'Mangala',
+      };
+
+      const TYPE_NAMES = {
+        '1': 'Perfectionist',
+        '2': 'Helper',
+        '3': 'Achiever',
+        '4': 'Individualist',
+        '5': 'Observer',
+        '6': 'Loyalist',
+        '7': 'Enthusiast',
+        '8': 'Challenger',
+        '9': 'Peacemaker',
+      };
+
+      /** @type {Record<string, string>} */
+      const TYPE_DEFINITIONS = {
+        '1': 'Principled and exacting; driven to improve things, hard on themselves.',
+        '2': 'Warm and giving; wants to be needed, slow to name their own needs.',
+        '3': 'Driven and adaptable; wants to succeed, can lose themselves in the role.',
+        '4': 'Sensitive and expressive; wants to be authentic, feels something is missing.',
+        '5': 'Private and perceptive; wants to understand, withdraws to save energy.',
+        '6': 'Committed and watchful; wants security, scans for what could go wrong.',
+        '7': 'Quick and optimistic; wants freedom and novelty, avoids discomfort.',
+        '8': 'Direct and protective; wants control of their own life, guards softness.',
+        '9': 'Easygoing and steady; wants peace, goes along and loses their own agenda.',
+      };
+
+      /** Enneagram centres, drawn as arcs outside the ring in Types mode. */
+      const TYPE_SECTORS = [
+        { digits: ['8', '9', '1'], group: 'body' },
+        { digits: ['2', '3', '4'], group: 'heart' },
+        { digits: ['5', '6', '7'], group: 'head' },
+      ];
+
+      /** Direction of stress along the lines; growth runs the other way. */
+      const TYPE_STRESS_NEXT = { 1: '4', 4: '2', 2: '8', 8: '5', 5: '7', 7: '1', 9: '6', 6: '3', 3: '9' };
+
+      /**
+       * Your own note for each line, shown when the line is tapped. Keys are the two numbers,
+       * smaller first. Empty strings show nothing.
+       * @type {Record<string, string>}
+       */
+      const CHORD_NOTES = {
+        '3|6': '',
+        '3|9': '',
+        '6|9': '',
+        '1|4': '',
+        '2|4': '',
+        '2|8': '',
+        '5|8': '',
+        '5|7': '',
+        '1|7': '',
+      };
 
       const MEDICINE_NAMES = {
         '9': 'Ketamine, DXM, Unicorn, Amanita Muscaria',
@@ -978,9 +1207,14 @@
       const ringEl = document.getElementById('ring-one');
       const birthProfileModal = document.getElementById('birth-profile-modal');
       const natalHubEl = document.getElementById('natal-hub');
-      const modeInputs = /** @type {HTMLInputElement[]} */ (
-        Array.from(document.querySelectorAll('input[name="ring-mode"]'))
+      const groupInputs = /** @type {HTMLInputElement[]} */ (
+        Array.from(document.querySelectorAll('input[name="ring-group"]'))
       );
+      const modeRows = /** @type {HTMLElement[]} */ (
+        Array.from(document.querySelectorAll('[data-ring-group]'))
+      );
+      const ringLegend = document.getElementById('ring-legend');
+      const planetNatalLegend = document.getElementById('planet-natal-legend');
       const emotionModal = document.getElementById('emotion-card-modal');
       const planetEphemerisSection = document.getElementById('planet-ephemeris');
 
@@ -1083,20 +1317,37 @@
           natalHub: natalHubEl,
           numericRingRoot: ringEl instanceof HTMLElement ? ringEl : null,
           snapshotToggleParent: document.getElementById('natal-snapshot-toggle-root'),
+          // Saving or clearing a chart changes the personal lines in Planets mode
+          onSave: () => paint(),
         });
       }
 
       /**
-       * One entry per segmented-control value. `pantheon` picks the ring's label-layout modifier;
-       * `story` swaps the hub deck for inline definitions opened from the label itself.
-       * @type {Record<string, { names?: Record<string, string>, pantheon?: 'greek' | 'literary' | 'medicine', ephemeris?: boolean, story?: boolean, gated?: boolean }>}
+       * One entry per view. `pantheon` picks the ring's label-layout modifier; `cards` swaps the
+       * emotion deck for one-line definitions opened from the label itself; `natal` adds the
+       * viewer's own placements under each name when a birth chart is saved.
+       * @type {Record<string, { names?: Record<string, string | string[]>, pantheon?: string, ephemeris?: boolean, natal?: boolean, cards?: Record<string, object[]>, sectors?: { digits: string[], group: string }[], stress?: boolean, gated?: boolean }>}
        */
       const MODES = {
         numbers: {},
-        planets: { names: PLANET_NAMES, ephemeris: true },
-        story: { names: LITERARY_NAMES, pantheon: 'literary', story: true },
+        planets: { names: PLANET_NAMES, ephemeris: true, natal: true },
+        signs: { names: SIGN_NAMES, pantheon: 'signs' },
+        days: { names: DAY_METAL_NAMES, pantheon: 'days' },
         egypt: { names: EGYPTIAN_NAMES },
         greek: { names: GREEK_NAMES, pantheon: 'greek' },
+        india: { names: NAVAGRAHA_NAMES, pantheon: 'india' },
+        types: {
+          names: TYPE_NAMES,
+          pantheon: 'types',
+          cards: definitionCards(TYPE_NAMES, TYPE_DEFINITIONS),
+          sectors: TYPE_SECTORS,
+          stress: true,
+        },
+        story: {
+          names: LITERARY_NAMES,
+          pantheon: 'literary',
+          cards: definitionCards(LITERARY_NAMES, LITERARY_DEFINITIONS),
+        },
         medicine: { names: MEDICINE_NAMES, pantheon: 'medicine', gated: true },
       };
 
@@ -1104,47 +1355,143 @@
         return document.documentElement.classList.contains('site-medicine-unlocked');
       }
 
-      /** Selected mode key; a gated mode without the unlock falls back to `numbers`. */
+      /**
+       * Two-level control: a group radio, then that group's own radio row (each row keeps its own
+       * selection, so returning to a group restores the last view). A gated view without the
+       * unlock falls back to the first view in its row.
+       */
       function currentModeKey() {
-        const checked = modeInputs.find((el) => el.checked);
-        const key = checked && checked.value in MODES ? checked.value : 'numbers';
-        if (MODES[key].gated && !medicineAllowed()) {
-          const fallback = modeInputs.find((el) => el.value === 'numbers');
-          if (fallback) fallback.checked = true;
-          return 'numbers';
+        const group = groupInputs.find((el) => el.checked)?.value ?? 'numbers';
+        const row = modeRows.find((el) => el.dataset.ringGroup === group);
+        if (!row) return 'numbers';
+        const inputs = /** @type {HTMLInputElement[]} */ (Array.from(row.querySelectorAll('input')));
+        let checked = inputs.find((el) => el.checked) ?? inputs[0];
+        if (!checked || !(checked.value in MODES)) return 'numbers';
+        if (MODES[checked.value].gated && !medicineAllowed()) {
+          checked = inputs[0];
+          checked.checked = true;
         }
-        return key;
+        return checked.value;
+      }
+
+      /** Natal rows by body name, or null without a saved chart. */
+      function natalRowsByName() {
+        const profile = loadBirthProfile();
+        if (!profile) return null;
+        const birth = new Date(profile.birthUtcIso);
+        if (Number.isNaN(birth.getTime())) return null;
+        const byName = new Map(computeEphemerisRows(birth).map((r) => [r.name, r]));
+        let rising = null;
+        try {
+          rising = longitudeToPlacement(
+            ascendantTropicalLongitude(birth, profile.latitudeDeg, profile.longitudeDeg)
+          );
+        } catch {
+          rising = null;
+        }
+        return { byName, rising };
+      }
+
+      /** `12° ♌` — short enough to sit under a planet name on a phone. */
+      function natalShort(row) {
+        const r = row.retrograde ? ' ℞' : '';
+        return `${row.degreeInSign}° ${asTextGlyph(SIGN_GLYPHS[row.sign])}${r}`;
+      }
+
+      /** Planet names with the viewer's own placement as a second (gold) line per body. */
+      function namesWithNatal(names, natal) {
+        /** @type {Record<string, string[]>} */
+        const out = {};
+        for (const digit of Object.keys(names)) {
+          const bodies = PLANET_EPHEM_BODY_NAMES_BY_DIGIT[digit] ?? [];
+          const lines = bodies
+            .map((body) => {
+              const row = natal.byName.get(body);
+              if (!row) return null;
+              return bodies.length > 1
+                ? `${asTextGlyph(BODY_GLYPHS[body])} ${natalShort(row)}`
+                : natalShort(row);
+            })
+            .filter(Boolean);
+          out[digit] = [String(names[digit]), ...lines];
+        }
+        return out;
       }
 
       const planetPositionsEl = document.getElementById('planet-positions');
 
-      /** Full-name companion to the glyph chips inside the ring. @param {Date} date */
+      /** @param {{ degreeInSign: number, minuteInSign: number, sign: string, retrograde?: boolean }} row */
+      function positionCell(row, className) {
+        const dd = document.createElement('dd');
+        if (className) dd.className = className;
+        // Tighter than the natal card's `16° 36′`: columns must fit a phone
+        dd.textContent = formatEphemerisPosition({ ...row, retrograde: false }).replace('° ', '°');
+        if (row.retrograde) {
+          const retro = document.createElement('abbr');
+          retro.className = 'planet-ephemeris__retro';
+          retro.title = 'Retrograde';
+          retro.textContent = '℞';
+          dd.append(' ', retro);
+        }
+        return dd;
+      }
+
+      /**
+       * Full-name companion to the glyph chips inside the ring. With a saved chart it gains a
+       * "Yours" column and a Rising row (Rising has no spoke: the ring maps planets).
+       * @param {Date} date
+       */
       function renderPlanetTable(date) {
         if (!(planetPositionsEl instanceof HTMLElement)) return;
-        planetPositionsEl.replaceChildren(
-          ...computeEphemerisRows(date).map((row) => {
+        const natal = natalRowsByName();
+        planetPositionsEl.classList.toggle('planet-ephemeris__table--natal', Boolean(natal));
+        if (planetNatalLegend) planetNatalLegend.hidden = !natal;
+
+        const items = computeEphemerisRows(date).map((row) => {
+          const item = document.createElement('div');
+          item.className = 'planet-ephemeris__row';
+          const dt = document.createElement('dt');
+          const glyph = document.createElement('span');
+          glyph.className = 'planet-ephemeris__glyph';
+          glyph.setAttribute('aria-hidden', 'true');
+          glyph.textContent = asTextGlyph(BODY_GLYPHS[row.name]);
+          dt.append(glyph, row.name);
+          item.append(dt, positionCell(row));
+          const mine = natal?.byName.get(row.name);
+          if (mine) item.append(positionCell(mine, 'planet-ephemeris__yours'));
+          return item;
+        });
+
+        if (natal) {
+          const head = document.createElement('div');
+          head.className = 'planet-ephemeris__row planet-ephemeris__row--head';
+          head.setAttribute('aria-hidden', 'true');
+          const blank = document.createElement('dt');
+          const now = document.createElement('dd');
+          now.textContent = 'Now';
+          const yours = document.createElement('dd');
+          yours.className = 'planet-ephemeris__yours';
+          yours.textContent = 'Yours';
+          head.append(blank, now, yours);
+          items.unshift(head);
+
+          if (natal.rising) {
             const item = document.createElement('div');
             item.className = 'planet-ephemeris__row';
             const dt = document.createElement('dt');
             const glyph = document.createElement('span');
             glyph.className = 'planet-ephemeris__glyph';
             glyph.setAttribute('aria-hidden', 'true');
-            glyph.textContent = asTextGlyph(BODY_GLYPHS[row.name]);
-            dt.append(glyph, row.name);
-            const dd = document.createElement('dd');
-            // Tighter than the natal card's `16° 36′`: two columns must fit a phone
-            dd.textContent = formatEphemerisPosition(row).replace(/ R$/, '').replace('° ', '°');
-            if (row.retrograde) {
-              const retro = document.createElement('abbr');
-              retro.className = 'planet-ephemeris__retro';
-              retro.title = 'Retrograde';
-              retro.textContent = '\u211E';
-              dd.append(' ', retro);
-            }
-            item.append(dt, dd);
-            return item;
-          })
-        );
+            glyph.textContent = 'Asc';
+            dt.append(glyph, 'Rising');
+            const none = document.createElement('dd');
+            none.textContent = '—';
+            item.append(dt, none, positionCell(natal.rising, 'planet-ephemeris__yours'));
+            items.push(item);
+          }
+        }
+
+        planetPositionsEl.replaceChildren(...items);
       }
 
       function refreshRingPlanetEphemeris() {
@@ -1156,25 +1503,50 @@
 
       setInterval(refreshRingPlanetEphemeris, 60000);
 
+      /** First line of a label, flattened, for naming the two ends of a line. */
+      function spokeName(names, digit) {
+        const n = names?.[digit];
+        if (!n) return '';
+        return (Array.isArray(n) ? n[0] : n).replace(/\s*\n\s*/g, ' and ');
+      }
+
       function paint() {
         const mode = MODES[currentModeKey()];
+        const natal = mode.natal ? natalRowsByName() : null;
+        const names = natal && mode.names ? namesWithNatal(mode.names, natal) : mode.names;
 
         mountNumericRing(ringEl, {
           labels: LABELS,
           chords: CHORDS,
           showNodes: true,
-          symbolNames: mode.names,
-          showSymbolNames: Boolean(mode.names),
+          symbolNames: names,
+          showSymbolNames: Boolean(names),
           symbolPantheon: mode.pantheon,
+          sectors: mode.sectors,
           ...(mode.ephemeris
             ? { planetEphemerisByDigit: buildPlanetEphemerisByDigit(new Date(), { compact: true }) }
             : {}),
-          ...(mode.story ? { hubDeckTrigger: 'symbol', hubDeckInlineDefinition: true } : {}),
-          slotCards: mode.story ? STORY_DEFINITION_CARDS_BY_DIGIT : CARDS_BY_DIGIT,
+          ...(mode.cards ? { hubDeckTrigger: 'symbol', hubDeckInlineDefinition: true } : {}),
+          slotCards: mode.cards ?? CARDS_BY_DIGIT,
           onSlotCardActivate: ({ card }) => {
             if (emotionModal instanceof HTMLDialogElement) {
               openEmotionCardModal(emotionModal, card);
             }
+          },
+          chordInfo: ({ a, b, group }) => {
+            const lines = [];
+            const nameA = spokeName(mode.names, a);
+            const nameB = spokeName(mode.names, b);
+            if (nameA && nameB) lines.push(`${nameA} and ${nameB}`);
+            if (mode.stress) {
+              const [from, to] = TYPE_STRESS_NEXT[a] === b ? [a, b] : [b, a];
+              lines.push(`Under stress ${from} leans toward ${to}. In growth ${to} leans toward ${from}.`);
+            } else {
+              lines.push(group === 'triad' ? 'A side of the 9 · 3 · 6 triangle' : 'A step on the 1 · 4 · 2 · 8 · 5 · 7 path');
+            }
+            const note = CHORD_NOTES[`${a}|${b}`];
+            if (note) lines.push(note);
+            return { title: `${a} — ${b}`, lines };
           },
         });
 
@@ -1182,11 +1554,24 @@
           planetEphemerisSection.hidden = !mode.ephemeris;
         }
         if (mode.ephemeris) renderPlanetTable(new Date());
+        if (ringLegend) ringLegend.hidden = !mode.sectors;
       }
 
-      for (const input of modeInputs) {
-        input.addEventListener('change', paint);
+      function syncModeRows() {
+        const group = groupInputs.find((el) => el.checked)?.value ?? 'numbers';
+        for (const row of modeRows) row.hidden = row.dataset.ringGroup !== group;
       }
+
+      for (const input of groupInputs) {
+        input.addEventListener('change', () => {
+          syncModeRows();
+          paint();
+        });
+      }
+      for (const row of modeRows) {
+        row.addEventListener('change', paint);
+      }
+      syncModeRows();
       paint();
       refreshRingPlanetEphemeris();
     </script>

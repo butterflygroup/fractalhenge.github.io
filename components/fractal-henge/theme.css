@@ -51,6 +51,10 @@
   --fh-numeral-action: #ecd9a0;
   --fh-numeral-action-hover: #ffe9ad;
   --fh-triad-glow: rgb(227 193 111 / 0.4);
+  /* Enneagram centres (Types view): warm, rose, cool — distinct from the gold accent */
+  --fh-center-body: #e0785a;
+  --fh-center-heart: #d9739a;
+  --fh-center-head: #6aa5e8;
 
   /*
    * Sky: a faint glow behind the ring plus three sparse star layers. Pure CSS, no image request.
@@ -99,6 +103,18 @@
   #ring-one {
     --nr-orbit-gap-scale: 2.6;
   }
+}
+
+#ring-one .numeric-ring__sector--body {
+  stroke: var(--fh-center-body);
+}
+
+#ring-one .numeric-ring__sector--heart {
+  stroke: var(--fh-center-heart);
+}
+
+#ring-one .numeric-ring__sector--head {
+  stroke: var(--fh-center-head);
 }
 
 /* The triangle carries a soft halo; the hexad stays flat so the hierarchy holds */
