@@ -880,3 +880,65 @@
     display: none;
   }
 }
+
+/*
+ * Motion. mountNumericRing rebuilds the ring's children on every mode change, so entrance
+ * animations replay per switch; only parts that differ between modes (labels, chips, deck)
+ * animate — numerals and chords are identical across rebuilds and must not flicker.
+ */
+
+/* Typed so it can transition: numerals, chords and track all derive from it and move in sync
+   when the ring changes size between modes on narrow screens. */
+@property --nr-size {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 352px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .numeric-ring {
+    transition: --nr-size 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  /* Labels emerge outward along their own spoke. `translate` is separate from the `transform`
+     that anchors them, so the two compose. Without trig support this degrades to a plain fade. */
+  @keyframes nr-label-in {
+    from {
+      opacity: 0;
+      translate: calc(-0.5rem * sin(var(--nr-slot-deg))) calc(0.5rem * cos(var(--nr-slot-deg)));
+    }
+  }
+
+  @keyframes nr-pop-in {
+    from {
+      opacity: 0;
+      scale: 0.9;
+    }
+  }
+
+  .numeric-ring__symbol-name {
+    animation: nr-label-in 0.34s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--nr-slot-index, 0) * 24ms);
+  }
+
+  .numeric-ring__symbol-ephem {
+    animation: nr-pop-in 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(80ms + var(--nr-slot-index, 0) * 24ms);
+  }
+
+  .numeric-ring__hub-deck-stack > * {
+    animation: nr-pop-in 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .numeric-ring__hub-deck-stack > :nth-child(2) {
+    animation-delay: 40ms;
+  }
+
+  .numeric-ring__hub-deck-stack > :nth-child(3) {
+    animation-delay: 80ms;
+  }
+
+  .numeric-ring__hub-deck-stack > :nth-child(n + 4) {
+    animation-delay: 120ms;
+  }
+}

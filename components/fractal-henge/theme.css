@@ -106,3 +106,32 @@
 #ring-one .numeric-ring__node--triad {
   filter: drop-shadow(0 0 3px var(--fh-triad-glow));
 }
+
+/* Motion shared by page-level surfaces (the ring component carries its own). */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes fh-rise-in {
+    from {
+      opacity: 0;
+      translate: 0 0.5rem;
+    }
+  }
+
+  @keyframes fh-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  dialog[open] {
+    animation: fh-rise-in 0.24s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  dialog[open]::backdrop {
+    animation: fh-fade-in 0.24s ease-out;
+  }
+
+  /* Planets mode reveals this section; it should arrive, not pop */
+  .planet-ephemeris:not([hidden]) {
+    animation: fh-rise-in 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) 60ms both;
+  }
+}

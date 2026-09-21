@@ -29,6 +29,17 @@
   visibility: hidden;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  /* Natal card yields to the hub deck with a fade; visibility flips after the fade-out ends */
+  .natal-hub {
+    transition: opacity 0.2s ease-out, visibility 0s linear 0.2s;
+  }
+
+  .ring-hub-wrap:not(:has(#ring-one.numeric-ring--hubDeckOpen)) .natal-hub {
+    transition-delay: 0s;
+  }
+}
+
 .natal-hub--empty {
   visibility: hidden;
 }

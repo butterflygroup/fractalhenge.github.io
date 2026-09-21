@@ -342,6 +342,8 @@ export function mountNumericRing(root, options = {}) {
     outer.className = 'numeric-ring__label';
     outer.dataset.nrDigit = text;
     outer.style.setProperty('--nr-slot-deg', `${angle}deg`);
+    // Clockwise position from the top; CSS uses it to stagger entrance animations
+    outer.style.setProperty('--nr-slot-index', String(index));
 
     const digitArm = document.createElement('span');
     digitArm.className = `${ARM_CLASS} ${ARM_DIGIT_CLASS}`;
